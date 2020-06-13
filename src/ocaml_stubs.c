@@ -18,6 +18,10 @@ void ocaml_jl_start() {
 void ocaml_to_jl(value v, jl_value_t **jl_res) {
   CAMLparam1(v);
   CAMLlocal1(arg);
+  if (v == Val_int(0)) {
+    *jl_res = jl_nothing;
+    return;
+  }
   int tag = Tag_val(v);
   arg = Field(v, 0);
   if (tag == 0) {
@@ -45,17 +49,14 @@ void ocaml_to_jl(value v, jl_value_t **jl_res) {
   }
   else if (tag == 5) {
     size_t len = Wosize_val(arg);
-    jl_value_t *res = 0;
-    JL_GC_PUSH1(&res);
-    res = (jl_value_t*)jl_svec(len);
+    *jl_res = (jl_value_t*)jl_svec(len);
     for (size_t i = 0; i < len; ++i) {
       jl_value_t *elem = 0;
       JL_GC_PUSH1(&elem);
       ocaml_to_jl(Field(arg, i), &elem);
-      jl_svecset((jl_svec_t*)res, i, elem);
+      jl_svecset((jl_svec_t*)*jl_res, i, elem);
       JL_GC_POP();
     }
-    *jl_res = (jl_value_t*)jl_apply_tuple_type((jl_svec_t*)res);
     JL_GC_POP();
   }
   else if (tag == 6) {
@@ -72,6 +73,9 @@ value jl_to_ocaml(jl_value_t* v) {
   CAMLparam0();
   CAMLlocal2(res, arg);
   int tag = -1;
+  if (jl_is_nothing(v)) {
+    return Val_int(0);
+  }
   if (jl_typeis(v, jl_float64_type)) {
     double d = jl_unbox_float64(v);
     arg = caml_copy_double(d);
