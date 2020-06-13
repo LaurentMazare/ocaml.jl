@@ -1,0 +1,34 @@
+open! Base
+
+let func ~fn ~name =
+  let fn args kwargs =
+    let args =
+      match (args : Jl_value.t) with
+      | Tuple args | Array args -> args
+      | _ ->
+        Printf.failwithf "expected a tuple as args, got %s" (Jl_value.kind_str args) ()
+    in
+    let kwargs =
+      match (kwargs : Jl_value.t) with
+      | Array pairs ->
+        Array.fold pairs ~init:[] ~f:(fun acc pair ->
+            match pair with
+            | Tuple [| Symbol symbol; value |] -> (symbol, value) :: acc
+            | _ -> Printf.failwithf "expected a pair, got %s" (Jl_value.kind_str pair) ())
+        |> Map.of_alist_exn (module String)
+      | _ ->
+        Printf.failwithf
+          "expected an array of pairs as kwargs, got %s"
+          (Jl_value.kind_str kwargs)
+          ()
+    in
+    fn ~args ~kwargs
+  in
+  Caml.Callback.register name fn
+
+let defunc ~fn ~name =
+  let fn ~args ~kwargs = Defunc.apply fn args kwargs in
+  func ~fn ~name
+
+(* Force a dependency on named_fn to avoid the symbol not being linked. *)
+external _name : unit -> unit = "named_fn"

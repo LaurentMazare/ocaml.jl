@@ -1,0 +1,40 @@
+opam-version: "2.0"
+name:         "jl"
+bug-reports:  "https://github.com/LaurentMazare/ocaml.jl/issues"
+homepage:     "https://github.com/LaurentMazare/ocaml.jl"
+dev-repo:     "git+https://github.com/LaurentMazare/ocaml.jl.git"
+maintainer:   "Laurent Mazare <lmazare@gmail.com>"
+authors:      [ "Laurent Mazare" ]
+
+version: "dev"
+
+build: [["dune" "build" "-p" name "-j" jobs]]
+install: []
+remove:  []
+
+run-test: [
+  ["dune" "runtest" "-p" name "-j" jobs]
+]
+
+depends: [
+  "dune" {>= "2.0.0"}
+  "ocaml" {>= "4.06"}
+  "ocaml-compiler-libs"
+  "base"
+  "ppx_let"
+  "ppx_sexp_conv"
+  "sexplib"
+  "stdio"
+]
+
+depopts: [
+]
+
+conflicts: [
+]
+
+synopsis: "Julia bindings for OCaml"
+description: """
+Some Julia bindings for OCaml. This makes it
+possible to call OCaml code from Julia.
+"""

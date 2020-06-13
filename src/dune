@@ -1,0 +1,6 @@
+(library
+  (name jl)
+  (flags :standard -linkall)
+  (foreign_stubs (language c) (flags -I /usr/include/julia) (names ocaml_stubs))
+  (preprocess (pps ppx_let ppx_sexp_conv))
+  (libraries base bigarray stdio))

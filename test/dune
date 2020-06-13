@@ -1,0 +1,6 @@
+(executables
+  (names ocaml)
+  (modes (native shared_object))
+  (flags :standard -linkall)
+  (preprocess (pps ppx_let ppx_sexp_conv))
+  (libraries base jl sexplib stdio))
