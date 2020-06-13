@@ -37,4 +37,5 @@ println(fn2(2; y="test"))
 
 fn2 = Caml.fn("yetanother_fn")
 println(fn2(4))
+println(typeof(fn2(4)))
 println(fn2(4)[2])

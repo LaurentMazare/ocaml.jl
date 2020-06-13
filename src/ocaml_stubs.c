@@ -49,14 +49,17 @@ void ocaml_to_jl(value v, jl_value_t **jl_res) {
   }
   else if (tag == 5) {
     size_t len = Wosize_val(arg);
-    *jl_res = (jl_value_t*)jl_svec(len);
+    jl_datatype_t *dt = 0;
+    jl_value_t **elems = 0;
+    JL_GC_PUSHARGS(elems, 2*len);
     for (size_t i = 0; i < len; ++i) {
-      jl_value_t *elem = 0;
-      JL_GC_PUSH1(&elem);
-      ocaml_to_jl(Field(arg, i), &elem);
-      jl_svecset((jl_svec_t*)*jl_res, i, elem);
-      JL_GC_POP();
+      ocaml_to_jl(Field(arg, i), elems + i);
+      // Recompute the element type via jl_typeof, this is
+      // certainly not optimal...
+      *(elems + len + i) = jl_typeof(*(elems + i));
     }
+    dt = jl_apply_tuple_type_v(elems + len, len);
+    *jl_res = jl_new_structv(dt, elems, len);
     JL_GC_POP();
   }
   else if (tag == 6) {

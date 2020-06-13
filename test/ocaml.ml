@@ -19,7 +19,7 @@ let myother_fn =
 let yetanother_fn =
   let%map_open.Jl x = positional "x" int ~docstring:"X" in
   Stdio.printf "%d\n%!" x;
-  Jl_value.Tuple [| Nothing; Int (x + 42) |]
+  Jl_value.Tuple [| Nothing; Int 1; Int 2; Int (x + 42) |]
 
 let () =
   Stdio.printf "Hello from ocaml!\n%!";
