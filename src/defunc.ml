@@ -21,7 +21,7 @@ module Arg = struct
     { name : string
     ; of_julia : 'a Of_julia.t
     ; (* The parameters docstrings are not exposed at the moment, but could
-         be useful when generating julia wrapping code.  *)
+         be useful when generating julia wrapping code. *)
       docstring : Docstring.t
     ; kind : [ `positional | `keyword of 'a option ]
     }
