@@ -31,7 +31,8 @@ void ocaml_to_jl(value v, jl_value_t **jl_res) {
     *jl_res = Bool_val(arg) ? jl_true : jl_false;
   }
   else if (tag == 2) {
-    *jl_res = jl_box_int64(Int_val(arg));
+    long long int v = Long_val(arg);
+    *jl_res = jl_box_int64(v);
   }
   else if (tag == 3) {
     *jl_res = jl_pchar_to_string(String_val(arg), caml_string_length(arg));
@@ -95,35 +96,35 @@ value jl_to_ocaml(jl_value_t* v) {
     tag = 1;
   }
   else if (jl_typeis(v, jl_uint64_type)) {
-    arg = Val_int(jl_unbox_uint64(v));
+    arg = Val_long(jl_unbox_uint64(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_uint32_type)) {
-    arg = Val_int(jl_unbox_uint32(v));
+    arg = Val_long(jl_unbox_uint32(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_uint16_type)) {
-    arg = Val_int(jl_unbox_uint16(v));
+    arg = Val_long(jl_unbox_uint16(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_uint8_type)) {
-    arg = Val_int(jl_unbox_uint8(v));
+    arg = Val_long(jl_unbox_uint8(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_int64_type)) {
-    arg = Val_int(jl_unbox_int64(v));
+    arg = Val_long(jl_unbox_int64(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_int32_type)) {
-    arg = Val_int(jl_unbox_int32(v));
+    arg = Val_long(jl_unbox_int32(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_int16_type)) {
-    arg = Val_int(jl_unbox_int16(v));
+    arg = Val_long(jl_unbox_int16(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_int8_type)) {
-    arg = Val_int(jl_unbox_int8(v));
+    arg = Val_long(jl_unbox_int8(v));
     tag = 2;
   }
   else if (jl_typeis(v, jl_string_type)) {

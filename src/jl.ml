@@ -1,3 +1,4 @@
+module Defunc = Defunc
 module Jl_value = Jl_value
 module Register = Register
 

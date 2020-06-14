@@ -1,6 +1,15 @@
 (executables
   (names ocaml)
+  (modules ocaml)
   (modes (native shared_object))
   (flags :standard -linkall)
   (preprocess (pps ppx_let ppx_sexp_conv))
   (libraries base jl sexplib stdio))
+
+(executables
+  (names ocaml_timens)
+  (modules ocaml_timens)
+  (modes (native shared_object))
+  (flags :standard -linkall)
+  (preprocess (pps ppx_let ppx_sexp_conv))
+  (libraries core_kernel jl sexplib))

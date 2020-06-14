@@ -9,3 +9,5 @@ val func :
   unit
 
 val defunc : fn:Jl_value.t Defunc.t -> name:string -> unit
+
+val no_arg : fn:(unit -> Jl_value.t) -> name:string -> unit

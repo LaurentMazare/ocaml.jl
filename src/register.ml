@@ -31,5 +31,8 @@ let defunc ~fn ~name =
   let fn ~args ~kwargs = Defunc.apply fn args kwargs in
   func ~fn ~name
 
+let no_arg ~fn ~name =
+  defunc ~fn:(Defunc.no_arg fn) ~name
+
 (* Force a dependency on named_fn to avoid the symbol not being linked. *)
 external _name : unit -> unit = "named_fn"
