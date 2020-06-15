@@ -6,7 +6,7 @@
 #include<caml/mlvalues.h>
 #include<caml/printexc.h>
 
-#include<julia/julia.h>
+#include "ocaml_stubs.h"
 
 void ocaml_jl_start() {
   char *argv[2];

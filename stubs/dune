@@ -1,0 +1,3 @@
+(executables
+  (names gen)
+  (libraries ctypes.stubs))
