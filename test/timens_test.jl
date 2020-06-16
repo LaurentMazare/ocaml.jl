@@ -36,24 +36,16 @@ struct Span
     ns::Int64
 end
 
-ocaml_of_string = Caml.fn("ocaml_time_ns_of_string")
-ocaml_to_string = Caml.fn("ocaml_time_ns_to_string")
-ocaml_span_of_string = Caml.fn("ocaml_span_of_string")
-ocaml_span_to_string = Caml.fn("ocaml_span_to_string")
-ocaml_now = Caml.fn("ocaml_time_ns_now")
-ocaml_add = Caml.fn("ocaml_time_ns_add")
-ocaml_diff = Caml.fn("ocaml_time_ns_diff")
+of_string(str::String) = TimeNs(Main.ocaml_time_ns_of_string(str))
+Base.show(io::IO, time::TimeNs) = print(io, Main.ocaml_time_ns_to_string(time.ns_since_epoch))
 
-of_string(str::String) = TimeNs(ocaml_of_string(str))
-Base.show(io::IO, time::TimeNs) = print(io, ocaml_to_string(time.ns_since_epoch))
+span_of_string(str::String) = Span(Main.ocaml_span_of_string(str))
+Base.show(io::IO, span::Span) = print(io, Main.ocaml_span_to_string(span.ns))
 
-span_of_string(str::String) = Span(ocaml_span_of_string(str))
-Base.show(io::IO, span::Span) = print(io, ocaml_span_to_string(span.ns))
+now() = TimeNs(Main.ocaml_time_ns_now())
 
-now() = TimeNs(ocaml_now())
-
-Base.:+(time::TimeNs, span::Span) = TimeNs(ocaml_add(time.ns_since_epoch, time.ns))
-Base.:-(lhs::TimeNs, rhs::TimeNs) = Span(ocaml_diff(lhs.ns_since_epoch, rhs.ns_since_epoch))
+Base.:+(time::TimeNs, span::Span) = TimeNs(Main.ocaml_time_ns_add(time.ns_since_epoch, time.ns))
+Base.:-(lhs::TimeNs, rhs::TimeNs) = Span(Main.ocaml_time_ns_diff(lhs.ns_since_epoch, rhs.ns_since_epoch))
 end
 
 time = T.of_string("2020-01-16 15:15:00.123456789+1")

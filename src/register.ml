@@ -30,7 +30,10 @@ let func ~fn ~name =
        exception text is propagated to julia. *)
     | exn -> Exn.to_string exn |> failwith
   in
-  Caml.Callback.register name (fn : Jl_value.t -> Jl_value.t -> Jl_value.t)
+  Caml.Callback.register name (fn : Jl_value.t -> Jl_value.t -> Jl_value.t);
+  Printf.sprintf "%s = Caml.fn(\"%s\")" name name
+  |> Wrapper.eval_string
+  |> (ignore : Wrapper.Jl_value.t -> unit)
 
 let defunc ~fn ~name =
   let fn ~args ~kwargs = Defunc.apply fn args kwargs in

@@ -74,4 +74,6 @@ module C (F : Cstubs.FOREIGN) = struct
 
   let set_const =
     foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
+
+  let eval_string = foreign "jl_eval_string" (string @-> returning Jl_value.t)
 end

@@ -47,3 +47,9 @@ module Jl_datatype : sig
 
   val set_on_module : t -> Jl_sym.t -> Jl_module.t -> unit
 end
+
+module Jl_value : sig
+  type t
+end
+
+val eval_string : string -> Jl_value.t

@@ -66,3 +66,9 @@ module Jl_datatype = struct
 
   let set_on_module t sym modl = C.set_const modl sym t
 end
+
+module Jl_value = struct
+  type t = C.Jl_value.t
+end
+
+let eval_string = C.eval_string
