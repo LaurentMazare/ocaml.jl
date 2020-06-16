@@ -12,7 +12,7 @@ module Jl_module = struct
   type t = C.Jl_module.t
 
   let create = C.Jl_module.create
-  let set_module = C.Jl_module.set_const
+  let set_module = C.set_const
   let base = !@C.Jl_module.base
   let core = !@C.Jl_module.core
   let main = !@C.Jl_module.main
@@ -64,5 +64,5 @@ module Jl_datatype = struct
       (if mutable_ then 1 else 0)
       ninitialized
 
-  let set_on_module t sym modl = C.Jl_module.set_const modl sym t
+  let set_on_module t sym modl = C.set_const modl sym t
 end

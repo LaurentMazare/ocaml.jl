@@ -6,16 +6,15 @@ module C (F : Cstubs.FOREIGN) = struct
   module Jl_sym = struct
     type t = unit ptr
 
-    let t : t typ = ptr void
+    let t : t typ = ptr (typedef void "jl_sym_t")
     let create = foreign "jl_symbol" (string @-> returning t)
   end
 
   module Jl_module = struct
     type t = unit ptr
 
-    let t : t typ = ptr void
+    let t : t typ = ptr (typedef void "jl_module_t")
     let create = foreign "jl_new_module" (Jl_sym.t @-> returning t)
-    let set_const = foreign "jl_set_const" (t @-> Jl_sym.t @-> t @-> returning void)
     let main = foreign_value "jl_main_module" t
     let core = foreign_value "jl_core_module" t
     let base = foreign_value "jl_base_module" t
@@ -25,7 +24,7 @@ module C (F : Cstubs.FOREIGN) = struct
   module Jl_svec = struct
     type t = unit ptr
 
-    let t : t typ = ptr void
+    let t : t typ = ptr (typedef void "jl_svec_t")
     let empty = foreign_value "jl_emptysvec" t
     let create1 = foreign "jl_svec1" (ptr void @-> returning t)
     let create2 = foreign "jl_svec2" (ptr void @-> ptr void @-> returning t)
@@ -34,7 +33,7 @@ module C (F : Cstubs.FOREIGN) = struct
   module Jl_datatype = struct
     type t = unit ptr
 
-    let t : t typ = ptr void
+    let t : t typ = ptr (typedef void "jl_datatype_t")
     let modl = foreign_value "jl_module_type" t
     let string = foreign_value "jl_string_type" t
     let bool = foreign_value "jl_bool_type" t
@@ -66,4 +65,13 @@ module C (F : Cstubs.FOREIGN) = struct
         @-> int (* ninitialized *)
         @-> returning t)
   end
+
+  module Jl_value = struct
+    type t = unit ptr
+
+    let t : t typ = ptr (typedef void "jl_value_t")
+  end
+
+  let set_const =
+    foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
 end
