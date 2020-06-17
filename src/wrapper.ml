@@ -43,6 +43,7 @@ module Jl_datatype = struct
   let float16 = !@C.Jl_datatype.float16
   let float32 = !@C.Jl_datatype.float32
   let float64 = !@C.Jl_datatype.float64
+  let errorexception = !@C.Jl_datatype.errorexception
   let any = !@C.Jl_datatype.any
 
   let create name module_ ~super ~fields ~abstract ~mutable_ ~ninitialized =
@@ -74,6 +75,7 @@ module Jl_value = struct
   let true_ = !@C.Jl_value.true_
   let false_ = !@C.Jl_value.false_
   let emptytuple = !@C.Jl_value.emptytuple
+  let error = C.Jl_value.error_value
 end
 
 let eval_string = C.eval_string
@@ -95,7 +97,16 @@ let register_fn name ~f =
     |> Nativeint.to_int_exn
   in
   Queue.enqueue funptrs fn;
-  let _voidp = C.get_funptr fn in
-  Printf.sprintf "fn_%s = %d" name fn_ptr_as_int
+  Printf.sprintf
+    "fn_%s = function(args...; kwargs...)\n\
+    \        kwargs = Any[(k.first, k.second) for k in kwargs]\n\
+    \        res = ccall(Ptr{Int}(%d), Any, (Any, Any), args, kwargs)\n\
+    \        if typeof(res) == ErrorException \n\
+    \          throw(res)\n\
+    \        end\n\
+    \        res\n\
+    \    end"
+    name
+    fn_ptr_as_int
   |> eval_string
   |> (ignore : Jl_value.t -> unit)

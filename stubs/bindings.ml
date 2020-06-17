@@ -49,6 +49,7 @@ module C (F : Cstubs.FOREIGN) = struct
     let float16 = foreign_value "jl_float16_type" t
     let float32 = foreign_value "jl_float32_type" t
     let float64 = foreign_value "jl_float64_type" t
+    let errorexception = foreign_value "jl_errorexception_type" t
     let any = foreign_value "jl_any_type" t
 
     let create =
@@ -74,16 +75,11 @@ module C (F : Cstubs.FOREIGN) = struct
     let true_ = foreign_value "jl_true" t
     let false_ = foreign_value "jl_false" t
     let emptytuple = foreign_value "jl_emptytuple" t
+    let error_value = foreign "jl_error_value" (string @-> returning t)
   end
 
   let set_const =
     foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
 
   let eval_string = foreign "jl_eval_string" (string @-> returning Jl_value.t)
-
-  let get_funptr =
-    foreign
-      "get_funptr"
-      (static_funptr Ctypes.(Jl_value.t @-> Jl_value.t @-> returning Jl_value.t)
-      @-> returning (ptr void))
 end

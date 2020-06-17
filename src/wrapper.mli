@@ -33,6 +33,7 @@ module Jl_datatype : sig
   val float16 : t
   val float32 : t
   val float64 : t
+  val errorexception : t
   val any : t
 
   val create
@@ -55,6 +56,7 @@ module Jl_value : sig
   val emptytuple : t
   val true_ : t
   val false_ : t
+  val error : string -> t
 end
 
 val eval_string : string -> Jl_value.t

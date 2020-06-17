@@ -8,5 +8,5 @@
 // as an array of pairs (symbol, value).
 typedef jl_value_t* (*jl_fn_ptr)(jl_value_t*, jl_value_t*);
 
-void *get_funptr(jl_fn_ptr fn);
+jl_value_t *jl_error_value(const char*, ...);
 #endif

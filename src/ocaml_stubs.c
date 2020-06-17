@@ -192,7 +192,10 @@ jl_value_t* named_fn(value* fn, jl_value_t* jl_args, jl_value_t* jl_kwargs) {
   return jl_res;
 }
 
-void *get_funptr(jl_fn_ptr fn) {
-  printf("funptr: %p\n", fn);
-  return (void*)fn;
+jl_value_t *jl_error_value(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    jl_value_t *e = jl_vexceptionf(jl_errorexception_type, fmt, args);
+    va_end(args);
+    return e;
 }
