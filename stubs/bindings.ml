@@ -70,10 +70,20 @@ module C (F : Cstubs.FOREIGN) = struct
     type t = unit ptr
 
     let t : t typ = ptr (typedef void "jl_value_t")
+    let nothing = foreign_value "jl_nothing" t
+    let true_ = foreign_value "jl_true" t
+    let false_ = foreign_value "jl_false" t
+    let emptytuple = foreign_value "jl_emptytuple" t
   end
 
   let set_const =
     foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
 
   let eval_string = foreign "jl_eval_string" (string @-> returning Jl_value.t)
+
+  let get_funptr =
+    foreign
+      "get_funptr"
+      (static_funptr Ctypes.(Jl_value.t @-> Jl_value.t @-> returning Jl_value.t)
+      @-> returning (ptr void))
 end

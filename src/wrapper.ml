@@ -69,6 +69,33 @@ end
 
 module Jl_value = struct
   type t = C.Jl_value.t
+
+  let nothing = !@C.Jl_value.nothing
+  let true_ = !@C.Jl_value.true_
+  let false_ = !@C.Jl_value.false_
+  let emptytuple = !@C.Jl_value.emptytuple
 end
 
 let eval_string = C.eval_string
+let funptrs = Queue.create ()
+
+let register_fn name ~f =
+  let fn =
+    coerce
+      (Foreign.funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
+      (static_funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
+      f
+  in
+  let fn_ptr_as_int =
+    coerce
+      (static_funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
+      (ptr void)
+      fn
+    |> raw_address_of_ptr
+    |> Nativeint.to_int_exn
+  in
+  Queue.enqueue funptrs fn;
+  let _voidp = C.get_funptr fn in
+  Printf.sprintf "fn_%s = %d" name fn_ptr_as_int
+  |> eval_string
+  |> (ignore : Jl_value.t -> unit)

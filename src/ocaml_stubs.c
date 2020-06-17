@@ -191,3 +191,8 @@ jl_value_t* named_fn(value* fn, jl_value_t* jl_args, jl_value_t* jl_kwargs) {
   JL_GC_POP();
   return jl_res;
 }
+
+void *get_funptr(jl_fn_ptr fn) {
+  printf("funptr: %p\n", fn);
+  return (void*)fn;
+}

@@ -50,6 +50,12 @@ end
 
 module Jl_value : sig
   type t
+
+  val nothing : t
+  val emptytuple : t
+  val true_ : t
+  val false_ : t
 end
 
 val eval_string : string -> Jl_value.t
+val register_fn : string -> f:(Jl_value.t -> Jl_value.t -> Jl_value.t) -> unit
