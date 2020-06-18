@@ -57,6 +57,13 @@ let () =
       ~ninitialized:0
   in
   Wrapper.(Jl_datatype.set_on_module dt (Jl_sym.create "MyStruct") modl);
+  Wrapper.register_fn "fn_ocaml_time_ns_now" ~f:(fun _ _ ->
+      (* This is unsafe, we should protect the value
+         between the last two steps. *)
+      Time_ns.now ()
+      |> Time_ns.to_int_ns_since_epoch
+      |> Wrapper.Jl_value.int
+      |> Wrapper.Jl_value.struct1 dt);
   Register.defunc ~fn:time_ns_of_string ~name:"ocaml_time_ns_of_string";
   Register.defunc ~fn:time_ns_to_string ~name:"ocaml_time_ns_to_string";
   Register.defunc ~fn:span_of_string ~name:"ocaml_span_of_string";

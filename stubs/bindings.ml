@@ -8,6 +8,7 @@ module C (F : Cstubs.FOREIGN) = struct
 
     let t : t typ = ptr (typedef void "jl_sym_t")
     let create = foreign "jl_symbol" (string @-> returning t)
+    let symbol_n = foreign "jl_symbol_n" (string @-> int @-> returning t)
   end
 
   module Jl_module = struct
@@ -71,15 +72,60 @@ module C (F : Cstubs.FOREIGN) = struct
     type t = unit ptr
 
     let t : t typ = ptr (typedef void "jl_value_t")
+
+    (* Creating values *)
     let nothing = foreign_value "jl_nothing" t
     let true_ = foreign_value "jl_true" t
     let false_ = foreign_value "jl_false" t
     let emptytuple = foreign_value "jl_emptytuple" t
     let error_value = foreign "jl_error_value" (string @-> returning t)
+    let box_float64 = foreign "jl_box_float64" (float @-> returning t)
+    let box_int8 = foreign "jl_box_int8" (int8_t @-> returning t)
+    let box_int16 = foreign "jl_box_int16" (int16_t @-> returning t)
+    let box_int32 = foreign "jl_box_int32" (int32_t @-> returning t)
+    let box_int64 = foreign "jl_box_int64" (int64_t @-> returning t)
+    let box_uint8 = foreign "jl_box_uint8" (uint8_t @-> returning t)
+    let box_uint16 = foreign "jl_box_uint16" (uint16_t @-> returning t)
+    let box_uint32 = foreign "jl_box_uint32" (uint32_t @-> returning t)
+    let box_uint64 = foreign "jl_box_uint64" (uint64_t @-> returning t)
+    let pchar_to_string = foreign "jl_pchar_to_string" (string @-> int @-> returning t)
+    let new_struct0 = foreign "jl_new_struct" (Jl_datatype.t @-> returning t)
+    let new_struct1 = foreign "jl_new_struct" (Jl_datatype.t @-> t @-> returning t)
+    let new_struct2 = foreign "jl_new_struct" (Jl_datatype.t @-> t @-> t @-> returning t)
+
+    let new_struct3 =
+      foreign "jl_new_struct" (Jl_datatype.t @-> t @-> t @-> t @-> returning t)
+
+    let new_struct4 =
+      foreign "jl_new_struct" (Jl_datatype.t @-> t @-> t @-> t @-> t @-> returning t)
+
+    (* Reading values *)
+    let is_nothing = foreign "jl_is_nothing" (t @-> returning int)
+    let is_bool = foreign "jl_is_bool" (t @-> returning int)
+    let is_symbol = foreign "jl_is_symbol" (t @-> returning int)
+    let is_int8 = foreign "jl_is_int8" (t @-> returning int)
+    let is_int16 = foreign "jl_is_int16" (t @-> returning int)
+    let is_int32 = foreign "jl_is_int32" (t @-> returning int)
+    let is_int64 = foreign "jl_is_int64" (t @-> returning int)
+    let is_uint8 = foreign "jl_is_uint8" (t @-> returning int)
+    let is_uint16 = foreign "jl_is_uint16" (t @-> returning int)
+    let is_uint32 = foreign "jl_is_uint32" (t @-> returning int)
+    let is_uint64 = foreign "jl_is_uint64" (t @-> returning int)
+    let unbox_float64 = foreign "jl_unbox_float64" (t @-> returning float)
+    let unbox_int8 = foreign "jl_unbox_int8" (t @-> returning int8_t)
+    let unbox_int16 = foreign "jl_unbox_int16" (t @-> returning int16_t)
+    let unbox_int32 = foreign "jl_unbox_int32" (t @-> returning int32_t)
+    let unbox_int64 = foreign "jl_unbox_int64" (t @-> returning int64_t)
+    let unbox_uint8 = foreign "jl_unbox_uint8" (t @-> returning uint8_t)
+    let unbox_uint16 = foreign "jl_unbox_uint16" (t @-> returning uint16_t)
+    let unbox_uint32 = foreign "jl_unbox_uint32" (t @-> returning uint32_t)
+    let unbox_uint64 = foreign "jl_unbox_uint64" (t @-> returning uint64_t)
   end
 
   let set_const =
     foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
 
   let eval_string = foreign "jl_eval_string" (string @-> returning Jl_value.t)
+  let gc_push_args = foreign "jl_gc_push_args" (int @-> returning (ptr Jl_value.t))
+  let gc_pop = foreign "jl_gc_pop" (void @-> returning void)
 end

@@ -9,4 +9,6 @@
 typedef jl_value_t* (*jl_fn_ptr)(jl_value_t*, jl_value_t*);
 
 jl_value_t *jl_error_value(const char*, ...);
+jl_value_t **jl_gc_push_args(int n);
+void jl_gc_pop();
 #endif

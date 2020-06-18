@@ -199,3 +199,16 @@ jl_value_t *jl_error_value(const char *fmt, ...) {
     va_end(args);
     return e;
 }
+
+jl_value_t **jl_gc_push_args(int n) {
+  jl_value_t **rts_var = (jl_value_t**)malloc((n + 2)*sizeof(jl_value_t*));
+  rts_var += 2;
+  ((void**)rts_var)[-2] = (void*)JL_GC_ENCODE_PUSHARGS(n);
+  ((void**)rts_var)[-1] = jl_pgcstack;
+  memset((void*)rts_var, 0, n * sizeof(jl_value_t*));
+  jl_pgcstack = (jl_gcframe_t*)&(((void**)rts_var)[-2]);
+}
+
+void jl_gc_pop() {
+  jl_pgcstack = jl_pgcstack->prev;
+}

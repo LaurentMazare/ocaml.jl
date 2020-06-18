@@ -76,12 +76,31 @@ module Jl_value = struct
   let false_ = !@C.Jl_value.false_
   let emptytuple = !@C.Jl_value.emptytuple
   let error = C.Jl_value.error_value
+  let float64 = C.Jl_value.box_float64
+  let int v = Int64.of_int v |> C.Jl_value.box_int64
+  let int64 = C.Jl_value.box_int64
+  let string s = C.Jl_value.pchar_to_string s (String.length s)
+  let struct0 = C.Jl_value.new_struct0
+  let struct1 = C.Jl_value.new_struct1
+  let struct2 = C.Jl_value.new_struct2
+  let struct3 = C.Jl_value.new_struct3
+  let struct4 = C.Jl_value.new_struct4
+
+  let bool = function
+    | true -> true_
+    | false -> false_
 end
 
 let eval_string = C.eval_string
 let funptrs = Queue.create ()
 
 let register_fn name ~f =
+  if not (String.for_all name ~f:(fun c -> Char.is_alphanum c || Char.( = ) c '_'))
+  then Printf.failwithf "invalid name %s" name ();
+  let f args kwargs =
+    try f args kwargs with
+    | exn -> Exn.to_string exn |> Jl_value.error
+  in
   let fn =
     coerce
       (Foreign.funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
@@ -98,7 +117,7 @@ let register_fn name ~f =
   in
   Queue.enqueue funptrs fn;
   Printf.sprintf
-    "fn_%s = function(args...; kwargs...)\n\
+    "%s = function(args...; kwargs...)\n\
     \        kwargs = Any[(k.first, k.second) for k in kwargs]\n\
     \        res = ccall(Ptr{Int}(%d), Any, (Any, Any), args, kwargs)\n\
     \        if typeof(res) == ErrorException \n\

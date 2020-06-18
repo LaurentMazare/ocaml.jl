@@ -52,11 +52,22 @@ end
 module Jl_value : sig
   type t
 
+  (* jl-values have to be protected from the gc. *)
   val nothing : t
   val emptytuple : t
   val true_ : t
   val false_ : t
   val error : string -> t
+  val bool : bool -> t
+  val float64 : float -> t
+  val int : int -> t
+  val int64 : Int64.t -> t
+  val string : string -> t
+  val struct0 : Jl_datatype.t -> t
+  val struct1 : Jl_datatype.t -> t -> t
+  val struct2 : Jl_datatype.t -> t -> t -> t
+  val struct3 : Jl_datatype.t -> t -> t -> t -> t
+  val struct4 : Jl_datatype.t -> t -> t -> t -> t -> t
 end
 
 val eval_string : string -> Jl_value.t

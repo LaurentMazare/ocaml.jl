@@ -32,13 +32,6 @@ let func ~fn ~name =
        exception text is propagated to julia. *)
     | exn -> Exn.to_string exn |> failwith
   in
-  Wrapper.register_fn name ~f:(fun _args _kwargs ->
-      try
-        Caml.Printf.printf "hello from ocaml!\n";
-        Caml.flush_all ();
-        Wrapper.Jl_value.nothing
-      with
-      | exn -> Exn.to_string exn |> Wrapper.Jl_value.error);
   Caml.Callback.register name (fn : Jl_value.t -> Jl_value.t -> Jl_value.t);
   Printf.sprintf "%s = Caml.fn(\"%s\")" name name
   |> Wrapper.eval_string
