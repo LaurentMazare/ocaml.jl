@@ -127,6 +127,13 @@ module C (F : Cstubs.FOREIGN) = struct
     let get_nth_field = foreign "jl_get_nth_field" (t @-> int @-> returning t)
     let nfields = foreign "jl_nfields" (t @-> returning int)
     let get_field = foreign "jl_get_field" (t @-> string @-> returning t)
+    let typeof_str = foreign "jl_typeof_str" (t @-> returning string)
+  end
+
+  module Exception = struct
+    let occurred = foreign "jl_exception_occurred" (void @-> returning Jl_value.t)
+    let current_exception = foreign "jl_current_exception" (void @-> returning Jl_value.t)
+    let clear = foreign "jl_exception_clear" (void @-> returning void)
   end
 
   let set_const =

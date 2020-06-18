@@ -80,6 +80,13 @@ module Jl_value : sig
   val to_int : t -> int
   val to_float : t -> float
   val to_string : t -> string
+  val typeof_str : t -> string
+end
+
+module Exception : sig
+  val occurred : unit -> Jl_value.t option
+  val current_exception : unit -> Jl_value.t
+  val clear : unit -> unit
 end
 
 val eval_string : string -> Jl_value.t

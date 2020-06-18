@@ -120,6 +120,17 @@ module Jl_value = struct
   let bool = function
     | true -> true_
     | false -> false_
+
+  let typeof_str = C.Jl_value.typeof_str
+end
+
+module Exception = struct
+  let occurred () =
+    let jl_value = C.Exception.occurred () in
+    if is_null jl_value then None else Some jl_value
+
+  let current_exception = C.Exception.current_exception
+  let clear = C.Exception.clear
 end
 
 let eval_string = C.eval_string
