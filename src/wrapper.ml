@@ -85,6 +85,37 @@ module Jl_value = struct
   let struct2 = C.Jl_value.new_struct2
   let struct3 = C.Jl_value.new_struct3
   let struct4 = C.Jl_value.new_struct4
+  let is_nothing t = C.Jl_value.is_nothing t <> 0
+  let is_bool t = C.Jl_value.is_bool t <> 0
+  let is_string t = C.Jl_value.is_string t <> 0
+  let is_tuple t = C.Jl_value.is_tuple t <> 0
+  let is_float _t = failwith "TODO"
+  let get_field = C.Jl_value.get_field
+  let nfields = C.Jl_value.nfields
+  let get_nth_field = C.Jl_value.get_nth_field
+  let to_float = C.Jl_value.unbox_float64
+
+  let to_int t =
+    if C.Jl_value.is_int8 t <> 0
+    then C.Jl_value.unbox_int8 t
+    else if C.Jl_value.is_int16 t <> 0
+    then C.Jl_value.unbox_int16 t
+    else if C.Jl_value.is_int32 t <> 0
+    then C.Jl_value.unbox_int32 t |> Int32.to_int_exn
+    else if C.Jl_value.is_int64 t <> 0
+    then C.Jl_value.unbox_int64 t |> Int64.to_int_exn
+    else failwith "not a supported int type"
+
+  let is_int t =
+    C.Jl_value.is_int8 t <> 0
+    || C.Jl_value.is_int16 t <> 0
+    || C.Jl_value.is_int32 t <> 0
+    || C.Jl_value.is_int64 t <> 0
+
+  let to_string t =
+    let length = C.Jl_value.string_len t in
+    let data = C.Jl_value.string_data t in
+    string_from_ptr data ~length
 
   let bool = function
     | true -> true_
@@ -92,6 +123,7 @@ module Jl_value = struct
 end
 
 let eval_string = C.eval_string
+let raise = C.raise
 let funptrs = Queue.create ()
 
 let register_fn name ~f =

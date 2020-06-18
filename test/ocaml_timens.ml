@@ -64,6 +64,13 @@ let () =
           |> Wrapper.Jl_value.int
           |> protect
           |> Wrapper.Jl_value.struct1 dt));
+  Wrapper.register_fn "fn_ocaml_time_ns_to_string" ~f:(fun args _ ->
+      let args = Wrapper.Jl_value.get_nth_field args 0 in
+      Wrapper.Jl_value.get_nth_field args 0
+      |> Wrapper.Jl_value.to_int
+      |> Time_ns.of_int_ns_since_epoch
+      |> Time_ns.to_string
+      |> Wrapper.Jl_value.string);
   Register.defunc ~fn:time_ns_of_string ~name:"ocaml_time_ns_of_string";
   Register.defunc ~fn:time_ns_to_string ~name:"ocaml_time_ns_to_string";
   Register.defunc ~fn:span_of_string ~name:"ocaml_span_of_string";

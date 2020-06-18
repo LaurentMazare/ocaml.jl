@@ -68,10 +68,23 @@ module Jl_value : sig
   val struct2 : Jl_datatype.t -> t -> t -> t
   val struct3 : Jl_datatype.t -> t -> t -> t -> t
   val struct4 : Jl_datatype.t -> t -> t -> t -> t -> t
+  val is_nothing : t -> bool
+  val is_bool : t -> bool
+  val is_int : t -> bool
+  val is_float : t -> bool
+  val is_string : t -> bool
+  val is_tuple : t -> bool
+  val nfields : t -> int
+  val get_field : t -> string -> t
+  val get_nth_field : t -> int -> t
+  val to_int : t -> int
+  val to_float : t -> float
+  val to_string : t -> string
 end
 
 val eval_string : string -> Jl_value.t
 val register_fn : string -> f:(Jl_value.t -> Jl_value.t -> Jl_value.t) -> unit
+val raise : string -> unit
 
 module Gc : sig
   (** [with_frame ~n (fun protect -> ...)] creates a new GC frame where a jl-value

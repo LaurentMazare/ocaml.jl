@@ -111,6 +111,10 @@ module C (F : Cstubs.FOREIGN) = struct
     let is_uint16 = foreign "jl_is_uint16" (t @-> returning int)
     let is_uint32 = foreign "jl_is_uint32" (t @-> returning int)
     let is_uint64 = foreign "jl_is_uint64" (t @-> returning int)
+    let is_string = foreign "jl_is_string" (t @-> returning int)
+    let is_tuple = foreign "jl_is_tuple" (t @-> returning int)
+    let string_len = foreign "jl_string_len" (t @-> returning int)
+    let string_data = foreign "jl_string_data" (t @-> returning (ptr char))
     let unbox_float64 = foreign "jl_unbox_float64" (t @-> returning float)
     let unbox_int8 = foreign "jl_unbox_int8" (t @-> returning int8_t)
     let unbox_int16 = foreign "jl_unbox_int16" (t @-> returning int16_t)
@@ -120,12 +124,16 @@ module C (F : Cstubs.FOREIGN) = struct
     let unbox_uint16 = foreign "jl_unbox_uint16" (t @-> returning uint16_t)
     let unbox_uint32 = foreign "jl_unbox_uint32" (t @-> returning uint32_t)
     let unbox_uint64 = foreign "jl_unbox_uint64" (t @-> returning uint64_t)
+    let get_nth_field = foreign "jl_get_nth_field" (t @-> int @-> returning t)
+    let nfields = foreign "jl_nfields" (t @-> returning int)
+    let get_field = foreign "jl_get_field" (t @-> string @-> returning t)
   end
 
   let set_const =
     foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
 
   let eval_string = foreign "jl_eval_string" (string @-> returning Jl_value.t)
+  let raise = foreign "jl_error" (string @-> returning void)
   let gc_push_args = foreign "jl_gc_push_args" (int @-> returning (ptr Jl_value.t))
   let gc_pop = foreign "jl_gc_pop" (void @-> returning void)
 end
