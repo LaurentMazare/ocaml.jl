@@ -72,3 +72,10 @@ end
 
 val eval_string : string -> Jl_value.t
 val register_fn : string -> f:(Jl_value.t -> Jl_value.t -> Jl_value.t) -> unit
+
+module Gc : sig
+  (** [with_frame ~n (fun protect -> ...)] creates a new GC frame where a jl-value
+  can be created. All the intermediary [Jl_value.t] have to be protected by
+  calling [protect] on them. [protect] can be called at most [n] times. *)
+  val with_frame : n:int -> ((Jl_value.t -> Jl_value.t) -> Jl_value.t) -> Jl_value.t
+end
