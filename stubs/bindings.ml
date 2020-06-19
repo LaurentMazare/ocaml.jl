@@ -103,6 +103,9 @@ module C (F : Cstubs.FOREIGN) = struct
     let new_struct4 =
       foreign "jl_new_struct" (Jl_datatype.t @-> t @-> t @-> t @-> t @-> returning t)
 
+    let new_structv =
+      foreign "jl_new_structv" (Jl_datatype.t @-> ptr t @-> int @-> returning t)
+
     (* Reading values *)
     let is_nothing = foreign "jl_is_nothing" (t @-> returning bool)
     let is_bool = foreign "jl_is_bool" (t @-> returning bool)
@@ -134,8 +137,12 @@ module C (F : Cstubs.FOREIGN) = struct
     let get_nth_field = foreign "jl_get_nth_field" (t @-> int @-> returning t)
     let nfields = foreign "jl_nfields" (t @-> returning int)
     let get_field = foreign "jl_get_field" (t @-> string @-> returning t)
+    let typeof = foreign "jl_typeof" (t @-> returning Jl_datatype.t)
     let typeof_str = foreign "jl_typeof_str" (t @-> returning string)
     let typeis = foreign "jl_typeis" (t @-> Jl_datatype.t @-> returning bool)
+
+    let apply_tuple_type_v =
+      foreign "jl_apply_tuple_type_v" (ptr t @-> int @-> returning Jl_datatype.t)
   end
 
   module Jl_array = struct

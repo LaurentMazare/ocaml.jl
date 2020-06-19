@@ -149,12 +149,35 @@ module Jl_value = struct
       string_from_ptr data ~length)
     else wrong_type t ~expected:"string"
 
+  let to_tuple t =
+    if is_tuple t
+    then (
+      let length = C.Jl_value.nfields t in
+      Array.init length ~f:(fun i -> C.Jl_value.get_nth_field t i))
+    else wrong_type t ~expected:"tuple"
+
+  let typeof = C.Jl_value.typeof
+
+  let tuple_map t_array ~f =
+    let n = Array.length t_array in
+    let frame = CArray.from_ptr (C.gc_push_args n) n in
+    let types = CArray.make C.Jl_datatype.t n in
+    Exn.protect ~finally:C.gc_pop ~f:(fun () ->
+        Array.iteri t_array ~f:(fun index elem ->
+            let elem = f elem in
+            CArray.set frame index elem;
+            CArray.set types index (typeof elem));
+        let tuple_type = C.Jl_value.apply_tuple_type_v (CArray.start types) n in
+        C.Jl_value.new_structv tuple_type (CArray.start frame) n)
+
+  let tuple = tuple_map ~f:Fn.id
+
   let to_array_any t =
     if typeis t array_any
     then (
       let length = C.Jl_array.array_len t in
       Array.init length ~f:(fun i -> C.Jl_array.array_ptr_ref t i))
-    else wrong_type t ~expected:"string"
+    else wrong_type t ~expected:"array-any"
 
   let array_any_map t_array ~f =
     Gc.with_frame ~n:1 (fun protect ->

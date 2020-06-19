@@ -69,6 +69,8 @@ module Jl_value : sig
   val struct2 : Jl_datatype.t -> t -> t -> t
   val struct3 : Jl_datatype.t -> t -> t -> t -> t
   val struct4 : Jl_datatype.t -> t -> t -> t -> t -> t
+  val tuple : t array -> t
+  val tuple_map : 'a array -> f:('a -> t) -> t
   val array_any : t array -> t
   val array_any_map : 'a array -> f:('a -> t) -> t
   val is_nothing : t -> bool
@@ -84,7 +86,9 @@ module Jl_value : sig
   val to_int : t -> int
   val to_float : t -> float
   val to_string : t -> string
+  val to_tuple : t -> t array
   val to_array_any : t -> t array
+  val typeof : t -> Jl_datatype.t
   val typeof_str : t -> string
   val typeis : t -> Jl_datatype.t -> bool
 end
@@ -109,6 +113,9 @@ val register_fn : string -> f:(Jl_value.t -> Jl_value.t -> Jl_value.t) -> unit
 val raise : string -> unit
 
 module Gc : sig
+  (* TODO: maybe we should have two distinct types, [Jl_value.unrooted]
+     and [Jl_value.rooted] ? *)
+
   (** [with_frame ~n (fun protect -> ...)] creates a new GC frame where a jl-value
   can be created. All the intermediary [Jl_value.t] have to be protected by
   calling [protect] on them. [protect] can be called at most [n] times. *)
