@@ -2,6 +2,18 @@ open! Base
 open! Ctypes
 module C = Bindings.C (Jl_ctypes)
 
+module Gc = struct
+  let with_frame ~n fn =
+    let frame = CArray.from_ptr (C.gc_push_args n) n in
+    let idx = ref 0 in
+    let protect jl_value =
+      CArray.set frame !idx jl_value;
+      Int.incr idx;
+      jl_value
+    in
+    Exn.protect ~f:(fun () -> fn protect) ~finally:C.gc_pop
+end
+
 module Jl_sym = struct
   type t = C.Jl_sym.t
 
@@ -73,6 +85,7 @@ end
 module Jl_value = struct
   type t = C.Jl_value.t
 
+  let array_any = !@C.Jl_value.array_any
   let nothing = !@C.Jl_value.nothing
   let true_ = !@C.Jl_value.true_
   let false_ = !@C.Jl_value.false_
@@ -98,16 +111,18 @@ module Jl_value = struct
   let get_field = C.Jl_value.get_field
   let nfields = C.Jl_value.nfields
   let get_nth_field = C.Jl_value.get_nth_field
+  let typeof_str = C.Jl_value.typeof_str
+  let typeis = C.Jl_value.typeis
+
+  let wrong_type t ~expected =
+    Printf.failwithf "not a supported %s type %s" expected (typeof_str t) ()
 
   let to_float t =
     if is_float64 t
-    then Some (C.Jl_value.unbox_float64 t)
+    then C.Jl_value.unbox_float64 t
     else if is_float32 t
-    then Some (C.Jl_value.unbox_float32 t)
-    else None
-
-  let typeof_str = C.Jl_value.typeof_str
-  let typeis = C.Jl_value.typeis
+    then C.Jl_value.unbox_float32 t
+    else wrong_type t ~expected:"float"
 
   let to_int t =
     if C.Jl_value.is_int8 t
@@ -118,7 +133,7 @@ module Jl_value = struct
     then C.Jl_value.unbox_int32 t |> Int32.to_int_exn
     else if C.Jl_value.is_int64 t
     then C.Jl_value.unbox_int64 t |> Int64.to_int_exn
-    else Printf.failwithf "not a supported int type %s" (typeof_str t) ()
+    else wrong_type t ~expected:"int"
 
   let is_int t =
     C.Jl_value.is_int8 t
@@ -127,9 +142,28 @@ module Jl_value = struct
     || C.Jl_value.is_int64 t
 
   let to_string t =
-    let length = C.Jl_value.string_len t in
-    let data = C.Jl_value.string_data t in
-    string_from_ptr data ~length
+    if is_string t
+    then (
+      let length = C.Jl_value.string_len t in
+      let data = C.Jl_value.string_data t in
+      string_from_ptr data ~length)
+    else wrong_type t ~expected:"string"
+
+  let to_array_any t =
+    if typeis t array_any
+    then (
+      let length = C.Jl_array.array_len t in
+      Array.init length ~f:(fun i -> C.Jl_array.array_ptr_ref t i))
+    else wrong_type t ~expected:"string"
+
+  let array_any_map t_array ~f =
+    Gc.with_frame ~n:1 (fun protect ->
+        let t = C.Jl_array.alloc_vec_any (Array.length t_array) |> protect in
+        Array.iteri t_array ~f:(fun index elem ->
+            C.Jl_array.array_ptr_set t index (f elem));
+        t)
+
+  let array_any = array_any_map ~f:Fn.id
 
   let bool = function
     | true -> true_
@@ -201,15 +235,3 @@ let register_fn name ~f =
       name
       (Jl_value.typeof_str jl_value)
       ()
-
-module Gc = struct
-  let with_frame ~n fn =
-    let frame = CArray.from_ptr (C.gc_push_args n) n in
-    let idx = ref 0 in
-    let protect jl_value =
-      CArray.set frame !idx jl_value;
-      Int.incr idx;
-      jl_value
-    in
-    Exn.protect ~f:(fun () -> fn protect) ~finally:C.gc_pop
-end

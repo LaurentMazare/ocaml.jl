@@ -69,6 +69,8 @@ module Jl_value : sig
   val struct2 : Jl_datatype.t -> t -> t -> t
   val struct3 : Jl_datatype.t -> t -> t -> t -> t
   val struct4 : Jl_datatype.t -> t -> t -> t -> t -> t
+  val array_any : t array -> t
+  val array_any_map : 'a array -> f:('a -> t) -> t
   val is_nothing : t -> bool
   val is_bool : t -> bool
   val is_int : t -> bool
@@ -80,8 +82,9 @@ module Jl_value : sig
   val get_field : t -> string -> t
   val get_nth_field : t -> int -> t
   val to_int : t -> int
-  val to_float : t -> float option
+  val to_float : t -> float
   val to_string : t -> string
+  val to_array_any : t -> t array
   val typeof_str : t -> string
   val typeis : t -> Jl_datatype.t -> bool
 end

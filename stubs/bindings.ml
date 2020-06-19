@@ -74,6 +74,9 @@ module C (F : Cstubs.FOREIGN) = struct
 
     let t : t typ = ptr (typedef void "jl_value_t")
 
+    (* Types ? *)
+    let array_any = foreign_value "jl_array_any_type" t
+
     (* Creating values *)
     let nothing = foreign_value "jl_nothing" t
     let true_ = foreign_value "jl_true" t
@@ -118,7 +121,6 @@ module C (F : Cstubs.FOREIGN) = struct
     let string_len = foreign "jl_string_len" (t @-> returning int)
     let string_data = foreign "jl_string_data" (t @-> returning (ptr char))
     let string_ptr = foreign "jl_string_ptr" (t @-> returning string)
-    let unbox_float16 = foreign "jl_unbox_float16" (t @-> returning float)
     let unbox_float32 = foreign "jl_unbox_float32" (t @-> returning float)
     let unbox_float64 = foreign "jl_unbox_float64" (t @-> returning float)
     let unbox_int8 = foreign "jl_unbox_int8" (t @-> returning int8_t)
