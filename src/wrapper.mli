@@ -2,6 +2,7 @@ module Jl_sym : sig
   type t
 
   val create : string -> t
+  val symbol_name : t -> string
 end
 
 module Jl_module : sig
@@ -74,13 +75,24 @@ module Jl_value : sig
   val is_float : t -> bool
   val is_string : t -> bool
   val is_tuple : t -> bool
+  val is_array : t -> bool
   val nfields : t -> int
   val get_field : t -> string -> t
   val get_nth_field : t -> int -> t
   val to_int : t -> int
-  val to_float : t -> float
+  val to_float : t -> float option
   val to_string : t -> string
   val typeof_str : t -> string
+  val typeis : t -> Jl_datatype.t -> bool
+end
+
+module Array : sig
+  type t
+
+  val create : length:int -> t
+  val set : t -> int -> Jl_value.t -> unit
+  val get : t -> int -> Jl_value.t
+  val length : t -> int
 end
 
 module Exception : sig

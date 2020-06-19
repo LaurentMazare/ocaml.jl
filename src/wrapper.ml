@@ -6,6 +6,8 @@ module Jl_sym = struct
   type t = C.Jl_sym.t
 
   let create = C.Jl_sym.create
+  let _symbol_n = C.Jl_sym.symbol_n
+  let symbol_name = C.Jl_sym.symbol_name
 end
 
 module Jl_module = struct
@@ -85,33 +87,44 @@ module Jl_value = struct
   let struct2 = C.Jl_value.new_struct2
   let struct3 = C.Jl_value.new_struct3
   let struct4 = C.Jl_value.new_struct4
-  let is_nothing t = C.Jl_value.is_nothing t <> 0
-  let is_bool t = C.Jl_value.is_bool t <> 0
-  let is_string t = C.Jl_value.is_string t <> 0
-  let is_tuple t = C.Jl_value.is_tuple t <> 0
-  let is_float _t = failwith "TODO"
+  let is_nothing = C.Jl_value.is_nothing
+  let is_bool = C.Jl_value.is_bool
+  let is_string = C.Jl_value.is_string
+  let is_tuple = C.Jl_value.is_tuple
+  let is_array = C.Jl_value.is_array
+  let is_float32 t = C.Jl_value.typeis t Jl_datatype.float32
+  let is_float64 t = C.Jl_value.typeis t Jl_datatype.float64
+  let is_float t = is_float32 t || is_float64 t
   let get_field = C.Jl_value.get_field
   let nfields = C.Jl_value.nfields
   let get_nth_field = C.Jl_value.get_nth_field
-  let to_float = C.Jl_value.unbox_float64
+
+  let to_float t =
+    if is_float64 t
+    then Some (C.Jl_value.unbox_float64 t)
+    else if is_float32 t
+    then Some (C.Jl_value.unbox_float32 t)
+    else None
+
   let typeof_str = C.Jl_value.typeof_str
+  let typeis = C.Jl_value.typeis
 
   let to_int t =
-    if C.Jl_value.is_int8 t <> 0
+    if C.Jl_value.is_int8 t
     then C.Jl_value.unbox_int8 t
-    else if C.Jl_value.is_int16 t <> 0
+    else if C.Jl_value.is_int16 t
     then C.Jl_value.unbox_int16 t
-    else if C.Jl_value.is_int32 t <> 0
+    else if C.Jl_value.is_int32 t
     then C.Jl_value.unbox_int32 t |> Int32.to_int_exn
-    else if C.Jl_value.is_int64 t <> 0
+    else if C.Jl_value.is_int64 t
     then C.Jl_value.unbox_int64 t |> Int64.to_int_exn
     else Printf.failwithf "not a supported int type %s" (typeof_str t) ()
 
   let is_int t =
-    C.Jl_value.is_int8 t <> 0
-    || C.Jl_value.is_int16 t <> 0
-    || C.Jl_value.is_int32 t <> 0
-    || C.Jl_value.is_int64 t <> 0
+    C.Jl_value.is_int8 t
+    || C.Jl_value.is_int16 t
+    || C.Jl_value.is_int32 t
+    || C.Jl_value.is_int64 t
 
   let to_string t =
     let length = C.Jl_value.string_len t in
@@ -121,6 +134,15 @@ module Jl_value = struct
   let bool = function
     | true -> true_
     | false -> false_
+end
+
+module Array = struct
+  type t = C.Jl_array.t
+
+  let create ~length = C.Jl_array.alloc_vec_any length
+  let length = C.Jl_array.array_len
+  let set = C.Jl_array.array_ptr_set
+  let get = C.Jl_array.array_ptr_ref
 end
 
 module Exception = struct

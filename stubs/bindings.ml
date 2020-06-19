@@ -9,6 +9,7 @@ module C (F : Cstubs.FOREIGN) = struct
     let t : t typ = ptr (typedef void "jl_sym_t")
     let create = foreign "jl_symbol" (string @-> returning t)
     let symbol_n = foreign "jl_symbol_n" (string @-> int @-> returning t)
+    let symbol_name = foreign "jl_symbol_name" (t @-> returning string)
   end
 
   module Jl_module = struct
@@ -100,22 +101,25 @@ module C (F : Cstubs.FOREIGN) = struct
       foreign "jl_new_struct" (Jl_datatype.t @-> t @-> t @-> t @-> t @-> returning t)
 
     (* Reading values *)
-    let is_nothing = foreign "jl_is_nothing" (t @-> returning int)
-    let is_bool = foreign "jl_is_bool" (t @-> returning int)
-    let is_symbol = foreign "jl_is_symbol" (t @-> returning int)
-    let is_int8 = foreign "jl_is_int8" (t @-> returning int)
-    let is_int16 = foreign "jl_is_int16" (t @-> returning int)
-    let is_int32 = foreign "jl_is_int32" (t @-> returning int)
-    let is_int64 = foreign "jl_is_int64" (t @-> returning int)
-    let is_uint8 = foreign "jl_is_uint8" (t @-> returning int)
-    let is_uint16 = foreign "jl_is_uint16" (t @-> returning int)
-    let is_uint32 = foreign "jl_is_uint32" (t @-> returning int)
-    let is_uint64 = foreign "jl_is_uint64" (t @-> returning int)
-    let is_string = foreign "jl_is_string" (t @-> returning int)
-    let is_tuple = foreign "jl_is_tuple" (t @-> returning int)
+    let is_nothing = foreign "jl_is_nothing" (t @-> returning bool)
+    let is_bool = foreign "jl_is_bool" (t @-> returning bool)
+    let is_symbol = foreign "jl_is_symbol" (t @-> returning bool)
+    let is_int8 = foreign "jl_is_int8" (t @-> returning bool)
+    let is_int16 = foreign "jl_is_int16" (t @-> returning bool)
+    let is_int32 = foreign "jl_is_int32" (t @-> returning bool)
+    let is_int64 = foreign "jl_is_int64" (t @-> returning bool)
+    let is_uint8 = foreign "jl_is_uint8" (t @-> returning bool)
+    let is_uint16 = foreign "jl_is_uint16" (t @-> returning bool)
+    let is_uint32 = foreign "jl_is_uint32" (t @-> returning bool)
+    let is_uint64 = foreign "jl_is_uint64" (t @-> returning bool)
+    let is_string = foreign "jl_is_string" (t @-> returning bool)
+    let is_tuple = foreign "jl_is_tuple" (t @-> returning bool)
+    let is_array = foreign "jl_is_array" (t @-> returning bool)
     let string_len = foreign "jl_string_len" (t @-> returning int)
     let string_data = foreign "jl_string_data" (t @-> returning (ptr char))
     let string_ptr = foreign "jl_string_ptr" (t @-> returning string)
+    let unbox_float16 = foreign "jl_unbox_float16" (t @-> returning float)
+    let unbox_float32 = foreign "jl_unbox_float32" (t @-> returning float)
     let unbox_float64 = foreign "jl_unbox_float64" (t @-> returning float)
     let unbox_int8 = foreign "jl_unbox_int8" (t @-> returning int8_t)
     let unbox_int16 = foreign "jl_unbox_int16" (t @-> returning int16_t)
@@ -129,6 +133,20 @@ module C (F : Cstubs.FOREIGN) = struct
     let nfields = foreign "jl_nfields" (t @-> returning int)
     let get_field = foreign "jl_get_field" (t @-> string @-> returning t)
     let typeof_str = foreign "jl_typeof_str" (t @-> returning string)
+    let typeis = foreign "jl_typeis" (t @-> Jl_datatype.t @-> returning bool)
+  end
+
+  module Jl_array = struct
+    type t = unit ptr
+
+    let t : t typ = ptr (typedef void "jl_array_t")
+    let alloc_vec_any = foreign "jl_alloc_vec_any" (int @-> returning t)
+
+    let array_ptr_set =
+      foreign "jl_array_ptr_set" (t @-> int @-> Jl_value.t @-> returning void)
+
+    let array_ptr_ref = foreign "jl_array_ptr_ref" (t @-> int @-> returning Jl_value.t)
+    let array_len = foreign "jl_array_len" (t @-> returning int)
   end
 
   module Exception = struct
