@@ -94,6 +94,7 @@ module Jl_value = struct
   let nfields = C.Jl_value.nfields
   let get_nth_field = C.Jl_value.get_nth_field
   let to_float = C.Jl_value.unbox_float64
+  let typeof_str = C.Jl_value.typeof_str
 
   let to_int t =
     if C.Jl_value.is_int8 t <> 0
@@ -104,7 +105,7 @@ module Jl_value = struct
     then C.Jl_value.unbox_int32 t |> Int32.to_int_exn
     else if C.Jl_value.is_int64 t <> 0
     then C.Jl_value.unbox_int64 t |> Int64.to_int_exn
-    else failwith "not a supported int type"
+    else Printf.failwithf "not a supported int type %s" (typeof_str t) ()
 
   let is_int t =
     C.Jl_value.is_int8 t <> 0
@@ -120,8 +121,6 @@ module Jl_value = struct
   let bool = function
     | true -> true_
     | false -> false_
-
-  let typeof_str = C.Jl_value.typeof_str
 end
 
 module Exception = struct
@@ -171,7 +170,15 @@ let register_fn name ~f =
     name
     fn_ptr_as_int
   |> eval_string
-  |> (ignore : Jl_value.t -> unit)
+  |> (ignore : Jl_value.t -> unit);
+  match Exception.occurred () with
+  | None -> ()
+  | Some jl_value ->
+    Printf.failwithf
+      "registration failed for %s: %s"
+      name
+      (Jl_value.typeof_str jl_value)
+      ()
 
 module Gc = struct
   let with_frame ~n fn =

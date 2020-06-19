@@ -115,6 +115,7 @@ module C (F : Cstubs.FOREIGN) = struct
     let is_tuple = foreign "jl_is_tuple" (t @-> returning int)
     let string_len = foreign "jl_string_len" (t @-> returning int)
     let string_data = foreign "jl_string_data" (t @-> returning (ptr char))
+    let string_ptr = foreign "jl_string_ptr" (t @-> returning string)
     let unbox_float64 = foreign "jl_unbox_float64" (t @-> returning float)
     let unbox_int8 = foreign "jl_unbox_int8" (t @-> returning int8_t)
     let unbox_int16 = foreign "jl_unbox_int16" (t @-> returning int16_t)
