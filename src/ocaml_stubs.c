@@ -218,3 +218,10 @@ int8_t ml_jl_to_bool(jl_value_t *t) {
   if (t == jl_false) return 0;
   return jl_unbox_bool(t);
 }
+
+jl_module_t *ml_jl_new_module(jl_sym_t* name, jl_module_t* parent) {
+  jl_module_t *modl = jl_new_module(name);
+  modl->parent = parent;
+  jl_set_const(parent, name, (jl_value_t*)modl);
+  return modl;
+}

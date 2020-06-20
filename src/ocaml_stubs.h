@@ -12,4 +12,5 @@ jl_value_t *ml_jl_error_value(const char*, ...);
 jl_value_t **ml_jl_gc_push_args(int n);
 void ml_jl_gc_pop();
 int8_t ml_jl_to_bool(jl_value_t*);
+jl_module_t *ml_jl_new_module(jl_sym_t*, jl_module_t*);
 #endif

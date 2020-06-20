@@ -31,7 +31,7 @@ end
 module Jl_module = struct
   type t = C.Jl_module.t
 
-  let create = C.Jl_module.create
+  let create name ~parent = C.Jl_module.create name parent
   let set_module = C.set_const
   let base = !@C.Jl_module.base
   let core = !@C.Jl_module.core

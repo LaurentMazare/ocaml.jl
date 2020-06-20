@@ -8,7 +8,7 @@ end
 module Jl_module : sig
   type t
 
-  val create : Jl_sym.t -> t
+  val create : Jl_sym.t -> parent:t -> t
   val set_module : t -> Jl_sym.t -> t -> unit
   val main : t
   val core : t

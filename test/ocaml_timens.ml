@@ -18,8 +18,7 @@ let time_ns ~modl =
 
 let () =
   let modl_name = Wrapper.Jl_sym.create "Time_ns" in
-  let modl = Wrapper.Jl_module.create modl_name in
-  Wrapper.(Jl_module.set_module Jl_module.main modl_name modl);
+  let modl = Wrapper.Jl_module.create modl_name ~parent:Wrapper.Jl_module.main in
   let time_ns = time_ns ~modl in
   let span_ns = span_ns ~modl in
   Register.no_arg "now" ~modl ~f:(fun () -> Time_ns.now () |> Jl_type.wrap time_ns);
