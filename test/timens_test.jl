@@ -17,3 +17,7 @@ span = Time_ns.span_of_string("4m30s")
 time = Time_ns.add(now, span)
 time_str = Time_ns.to_string(time)
 println("$time $time_str")
+
+using InteractiveUtils
+println(InteractiveUtils.varinfo())
+println(InteractiveUtils.varinfo(Time_ns))

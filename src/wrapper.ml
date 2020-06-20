@@ -285,7 +285,10 @@ let register_fn name ~modl ~f =
     |> eval_string
   in
   match Exception.occurred () with
-  | None -> C.set_const modl (Jl_sym.create name) fn
+  | None ->
+    let symbol = Jl_sym.create name in
+    C.set_const modl symbol fn;
+    C.Jl_module.export modl symbol
   | Some jl_value ->
     Printf.failwithf
       "registration failed for %s: %s"

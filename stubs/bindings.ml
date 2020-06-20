@@ -17,6 +17,7 @@ module C (F : Cstubs.FOREIGN) = struct
 
     let t : t typ = ptr (typedef void "jl_module_t")
     let create = foreign "jl_new_module" (Jl_sym.t @-> returning t)
+    let export = foreign "jl_module_export" (t @-> Jl_sym.t @-> returning void)
     let main = foreign_value "jl_main_module" t
     let core = foreign_value "jl_core_module" t
     let base = foreign_value "jl_base_module" t
