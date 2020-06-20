@@ -1,5 +1,5 @@
 using Libdl
-const shared_lib = "_build/default/test/ocaml.so"
+const shared_lib = "./ocaml.so"
 
 function start_ocaml()
     lib = Libdl.dlopen(shared_lib)

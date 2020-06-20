@@ -1,0 +1,13 @@
+Hello from ocaml!
+4
+4
+4
+Any[42.0, "foobar", (1337, "baz")]
+Any[42.0, "foobar", (1337, "baz")]
+Any[42.0, "foobar", (1337, "baz")]
+Any[42.0, "foobar", (1337, "baz")]
+foobar|foobar|foobar|foobar
+test|test
+(nothing, 1, 2, 46)
+Tuple{Nothing,Int64,Int64,Int64}
+1

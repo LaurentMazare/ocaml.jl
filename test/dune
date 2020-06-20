@@ -13,3 +13,13 @@
   (flags :standard -linkall)
   (preprocess (pps ppx_let ppx_sexp_conv))
   (libraries core_kernel jl sexplib))
+
+(rule
+ (target tests.output)
+ (deps ocaml.so generic_test.jl)
+ (action (with-stdout-to tests.output (run julia generic_test.jl))))
+
+(rule
+ (alias runtest)
+ (deps tests.expected)
+ (action (diff tests.expected tests.output)))
