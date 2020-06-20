@@ -9,6 +9,7 @@ module Of_julia : sig
     }
 
   val create : type_name:string -> conv:(Jl_value.t -> 'a) -> 'a t
+  val of_type : 'a Jl_type.t -> type_name:string -> 'a t
 end
 
 include Applicative.S with type 'a t := 'a t

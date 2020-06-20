@@ -1,9 +1,9 @@
 open! Base
 
-let func ~fn ~name =
+let func name ~modl ~f =
   if not (String.for_all name ~f:(fun c -> Char.is_alphanum c || Char.( = ) c '_'))
   then Printf.failwithf "invalid name %s" name ();
-  let fn args kwargs =
+  let f args kwargs =
     try
       let args =
         if Jl_value.is_tuple args
@@ -22,19 +22,19 @@ let func ~fn ~name =
           |> Map.of_alist_exn (module String)
         else Jl_value.type_error kwargs ~expected:"array of pairs"
       in
-      fn ~args ~kwargs
+      f ~args ~kwargs
     with
     (* Pretty-printing the exception and running failwith ensures that the
        exception text is propagated to julia. *)
     | exn -> Exn.to_string exn |> failwith
   in
-  Wrapper.register_fn name ~f:fn
+  Wrapper.register_fn name ~modl ~f
 
-let defunc ~fn ~name =
-  let fn ~args ~kwargs = Defunc.apply fn args kwargs in
-  func ~fn ~name
+let defunc name ~modl defunc =
+  let f ~args ~kwargs = Defunc.apply defunc args kwargs in
+  func name ~modl ~f
 
-let no_arg ~fn ~name = defunc ~fn:(Defunc.no_arg fn) ~name
+let no_arg name ~modl ~f = defunc name ~modl (Defunc.no_arg f)
 
 (* Force a dependency on named_fn to avoid the symbol not being linked. *)
 external _name : unit -> unit = "named_fn"

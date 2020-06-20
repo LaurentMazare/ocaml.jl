@@ -165,6 +165,10 @@ module C (F : Cstubs.FOREIGN) = struct
     let clear = foreign "jl_exception_clear" (void @-> returning void)
   end
 
+  module Gc = struct
+    let enable = foreign "jl_gc_enable" (bool @-> returning bool)
+  end
+
   let set_const =
     foreign "jl_set_const" (Jl_module.t @-> Jl_sym.t @-> Jl_value.t @-> returning void)
 

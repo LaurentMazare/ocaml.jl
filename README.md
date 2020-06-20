@@ -2,6 +2,8 @@
 
 Prototyping some Julia-OCaml bridge.
 
+**CAUTION** this is not memory safe at the moment and is likely to run into segfaults.
+
 The examples can be run with:
 ```bash
 > dune build test/ocaml.so
@@ -15,7 +17,7 @@ let concat_fn =
   let%map_open.Jl x = positional "x" int ~docstring:"X"
   and y = keyword "y" string ~default:"foobar" ~docstring:"Y" in
   let res = List.init x ~f:(fun _ -> y) |> String.concat ~sep:"|" in
-  Jl_value.String res
+  Jl_value.string res
 
 let () =
   Register.defunc ~fn:concat_fn ~name:"ocaml_concat"
@@ -24,6 +26,6 @@ let () =
 This can then be called from Julia via:
 ```julia
 fn2 = Caml.fn("myother_fn")
-println(fn2(4))
-println(fn2(2; y="test"))
+println(Main.ocaml_concat(4))
+println(Main.ocaml_concat(2; y="test"))
 ```

@@ -10,6 +10,7 @@ module Of_julia = struct
     }
 
   let create ~type_name ~conv = { type_name; conv }
+  let of_type jl_type ~type_name = { type_name; conv = Jl_type.unwrap jl_type }
 end
 
 module Docstring = struct

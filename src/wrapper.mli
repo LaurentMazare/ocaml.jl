@@ -117,15 +117,29 @@ module Exception : sig
 end
 
 val eval_string : string -> Jl_value.t
-val register_fn : string -> f:(Jl_value.t -> Jl_value.t -> Jl_value.t) -> unit
+
+val register_fn
+  :  string
+  -> modl:Jl_module.t
+  -> f:(Jl_value.t -> Jl_value.t -> Jl_value.t)
+  -> unit
+
 val raise : string -> unit
 
 module Gc : sig
   (* TODO: maybe we should have two distinct types, [Jl_value.unrooted]
-     and [Jl_value.rooted] ? *)
+     and [Jl_value.rooted] ?
+     Using the ocaml type system to enforce some of the static analyzer
+     annotations would be nice.
+     https://docs.julialang.org/en/v1/devdocs/gc-sa/
+
+     For the time being, we mostly rely on deactivating the gc.
+  *)
 
   (** [with_frame ~n (fun protect -> ...)] creates a new GC frame where a jl-value
   can be created. All the intermediary [Jl_value.t] have to be protected by
   calling [protect] on them. [protect] can be called at most [n] times. *)
   val with_frame : n:int -> ((Jl_value.t -> Jl_value.t) -> Jl_value.t) -> Jl_value.t
+
+  val run_with_no_gc : f:(unit -> 'a) -> 'a
 end

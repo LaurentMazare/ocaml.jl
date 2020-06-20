@@ -3,6 +3,12 @@ open! Ctypes
 module C = Bindings.C (Jl_ctypes)
 
 module Gc = struct
+  let enable = C.Gc.enable
+
+  let run_with_no_gc ~f =
+    let old_status = enable false in
+    Exn.protect ~f ~finally:(fun () -> ignore (enable old_status : bool))
+
   let with_frame ~n fn =
     let frame = CArray.from_ptr (C.gc_push_args n) n in
     let idx = ref 0 in
@@ -242,12 +248,13 @@ let eval_string = C.eval_string
 let raise = C.raise
 let funptrs = Queue.create ()
 
-let register_fn name ~f =
+let register_fn name ~modl ~f =
   if not (String.for_all name ~f:(fun c -> Char.is_alphanum c || Char.( = ) c '_'))
   then Printf.failwithf "invalid name %s" name ();
   let f args kwargs =
-    try f args kwargs with
-    | exn -> Exn.to_string exn |> Jl_value.error
+    Gc.run_with_no_gc ~f:(fun () ->
+        try f args kwargs with
+        | exn -> Exn.to_string exn |> Jl_value.error)
   in
   let fn =
     coerce
@@ -264,21 +271,21 @@ let register_fn name ~f =
     |> Nativeint.to_int_exn
   in
   Queue.enqueue funptrs fn;
-  Printf.sprintf
-    "%s = function(args...; kwargs...)\n\
-    \        kwargs = Any[(k.first, k.second) for k in kwargs]\n\
-    \        res = ccall(Ptr{Int}(%d), Any, (Any, Any), args, kwargs)\n\
-    \        if typeof(res) == ErrorException \n\
-    \          throw(res)\n\
-    \        end\n\
-    \        res\n\
-    \    end"
-    name
-    fn_ptr_as_int
-  |> eval_string
-  |> (ignore : Jl_value.t -> unit);
+  let fn =
+    Printf.sprintf
+      "function(args...; kwargs...)\n\
+      \        kwargs = Any[(k.first, k.second) for k in kwargs]\n\
+      \        res = ccall(Ptr{Int}(%d), Any, (Any, Any), args, kwargs)\n\
+      \        if typeof(res) == ErrorException \n\
+      \          throw(res)\n\
+      \        end\n\
+      \        res\n\
+      \    end"
+      fn_ptr_as_int
+    |> eval_string
+  in
   match Exception.occurred () with
-  | None -> ()
+  | None -> C.set_const modl (Jl_sym.create name) fn
   | Some jl_value ->
     Printf.failwithf
       "registration failed for %s: %s"

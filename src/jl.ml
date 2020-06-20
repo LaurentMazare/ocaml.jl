@@ -1,4 +1,5 @@
 module Defunc = Defunc
+module Jl_type = Jl_type
 module Jl_value = Jl_value
 module Register = Register
 module Wrapper = Wrapper

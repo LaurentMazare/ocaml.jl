@@ -1,78 +1,59 @@
 open Core_kernel
 open Jl
 
-let wrap time = Jl_value.int (Time_ns.to_int_ns_since_epoch time)
-let wrap_span span = Jl_value.int (Time_ns.Span.to_int_ns span)
+let span_ns ~modl =
+  let span_ns =
+    Jl_type.map Jl_type.int64 ~wrap:Time_ns.Span.to_int_ns ~unwrap:Time_ns.Span.of_int_ns
+  in
+  Jl_type.struct1 "Span" ~modl ~field:("ns", span_ns)
 
-let time_arg =
-  Defunc.Of_julia.create ~type_name:"time" ~conv:(fun time ->
-      Jl_value.to_int time |> Time_ns.of_int_ns_since_epoch)
-
-let span_arg =
-  Defunc.Of_julia.create ~type_name:"span" ~conv:(fun span ->
-      Jl_value.to_int span |> Time_ns.Span.of_int_ns)
-
-let time_ns_of_string =
-  let%map_open.Jl str = positional "str" string ~docstring:"" in
-  Time_ns.of_string str |> wrap
-
-let time_ns_to_string =
-  let%map_open.Jl time = positional "time" time_arg ~docstring:"" in
-  Jl_value.string (Time_ns.to_string time)
-
-let span_of_string =
-  let%map_open.Jl str = positional "str" string ~docstring:"" in
-  Time_ns.Span.of_string str |> wrap_span
-
-let span_to_string =
-  let%map_open.Jl span = positional "span" span_arg ~docstring:"" in
-  Jl_value.string (Time_ns.Span.to_string span)
-
-let time_ns_now () = Time_ns.now () |> wrap
-
-let diff =
-  let%map_open.Jl time1 = positional "time1" time_arg ~docstring:""
-  and time2 = positional "time2" time_arg ~docstring:"" in
-  Time_ns.diff time1 time2 |> wrap_span
-
-let add =
-  let%map_open.Jl time = positional "time" time_arg ~docstring:""
-  and span = positional "span" span_arg ~docstring:"" in
-  Time_ns.add time span |> wrap
+let time_ns ~modl =
+  let time_ns =
+    Jl_type.map
+      Jl_type.int64
+      ~wrap:Time_ns.to_int_ns_since_epoch
+      ~unwrap:Time_ns.of_int_ns_since_epoch
+  in
+  Jl_type.struct1 "Time" ~modl ~field:("ns_since_epoch", time_ns)
 
 let () =
-  let modl = Wrapper.Jl_sym.create "Foo" |> Wrapper.Jl_module.create in
-  Wrapper.(Jl_module.set_module Jl_module.main (Jl_sym.create "Foo") modl);
-  let dt =
-    Wrapper.Jl_datatype.create
-      (Wrapper.Jl_sym.create "MyStruct")
-      (* Using modl here results in a segfault. *)
-      Wrapper.Jl_module.main
-      ~super:Wrapper.Jl_datatype.any
-      ~abstract:false
-      ~fields:(`T1 (Wrapper.Jl_sym.create "ns", Wrapper.Jl_datatype.int64))
-      ~mutable_:false
-      ~ninitialized:0
-  in
-  Wrapper.(Jl_datatype.set_on_module dt (Jl_sym.create "MyStruct") modl);
-  Wrapper.register_fn "fn_ocaml_time_ns_now" ~f:(fun _ _ ->
-      Wrapper.Gc.with_frame ~n:1 (fun protect ->
-          Time_ns.now ()
-          |> Time_ns.to_int_ns_since_epoch
-          |> Wrapper.Jl_value.int
-          |> protect
-          |> Wrapper.Jl_value.struct1 dt));
-  Wrapper.register_fn "fn_ocaml_time_ns_to_string" ~f:(fun args _ ->
-      let args = Wrapper.Jl_value.get_nth_field args 0 in
-      Wrapper.Jl_value.get_nth_field args 0
-      |> Wrapper.Jl_value.to_int
-      |> Time_ns.of_int_ns_since_epoch
-      |> Time_ns.to_string
-      |> Wrapper.Jl_value.string);
-  Register.defunc ~fn:time_ns_of_string ~name:"ocaml_time_ns_of_string";
-  Register.defunc ~fn:time_ns_to_string ~name:"ocaml_time_ns_to_string";
-  Register.defunc ~fn:span_of_string ~name:"ocaml_span_of_string";
-  Register.defunc ~fn:span_to_string ~name:"ocaml_span_to_string";
-  Register.defunc ~fn:diff ~name:"ocaml_time_ns_diff";
-  Register.defunc ~fn:add ~name:"ocaml_time_ns_add";
-  Register.no_arg ~fn:time_ns_now ~name:"ocaml_time_ns_now"
+  let modl_name = Wrapper.Jl_sym.create "Time_ns" in
+  let modl = Wrapper.Jl_module.create modl_name in
+  Wrapper.(Jl_module.set_module Jl_module.main modl_name modl);
+  let time_ns = time_ns ~modl in
+  let span_ns = span_ns ~modl in
+  Register.no_arg "now" ~modl ~f:(fun () -> Time_ns.now () |> Jl_type.wrap time_ns);
+  let time_arg = Defunc.Of_julia.of_type time_ns ~type_name:"time" in
+  let span_arg = Defunc.Of_julia.of_type span_ns ~type_name:"span" in
+  Register.defunc
+    "of_string"
+    ~modl
+    (let%map_open.Jl time = positional "time" string ~docstring:"" in
+     Time_ns.of_string time |> Jl_type.wrap time_ns);
+  Register.defunc
+    "to_string"
+    ~modl
+    (let%map_open.Jl time = positional "time" time_arg ~docstring:"" in
+     Time_ns.to_string time |> Wrapper.Jl_value.string);
+  Register.defunc
+    "span_of_string"
+    ~modl
+    (let%map_open.Jl span = positional "span" string ~docstring:"" in
+     Time_ns.Span.of_string span |> Jl_type.wrap span_ns);
+  Register.defunc
+    "span_to_string"
+    ~modl
+    (let%map_open.Jl span = positional "span" span_arg ~docstring:"" in
+     Time_ns.Span.to_string span |> Wrapper.Jl_value.string);
+  Register.defunc
+    "add"
+    ~modl
+    (let%map_open.Jl time = positional "time" time_arg ~docstring:""
+     and span = positional "span" span_arg ~docstring:"" in
+     Time_ns.add time span |> Jl_type.wrap time_ns);
+  Register.defunc
+    "diff"
+    ~modl
+    (let%map_open.Jl time1 = positional "time1" time_arg ~docstring:""
+     and time2 = positional "time2" time_arg ~docstring:"" in
+     Time_ns.diff time1 time2 |> Jl_type.wrap span_ns)
