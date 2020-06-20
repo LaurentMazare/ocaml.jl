@@ -8,7 +8,8 @@
 // as an array of pairs (symbol, value).
 typedef jl_value_t* (*jl_fn_ptr)(jl_value_t*, jl_value_t*);
 
-jl_value_t *jl_error_value(const char*, ...);
-jl_value_t **jl_gc_push_args(int n);
-void jl_gc_pop();
+jl_value_t *ml_jl_error_value(const char*, ...);
+jl_value_t **ml_jl_gc_push_args(int n);
+void ml_jl_gc_pop();
+int8_t ml_jl_to_bool(jl_value_t*);
 #endif

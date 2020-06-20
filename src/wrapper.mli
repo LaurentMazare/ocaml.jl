@@ -74,23 +74,31 @@ module Jl_value : sig
   val array_any : t array -> t
   val array_any_map : 'a array -> f:('a -> t) -> t
   val is_nothing : t -> bool
+  val is_array_any : t -> bool
   val is_bool : t -> bool
   val is_int : t -> bool
   val is_float : t -> bool
   val is_string : t -> bool
+  val is_symbol : t -> bool
   val is_tuple : t -> bool
   val is_array : t -> bool
   val nfields : t -> int
   val get_field : t -> string -> t
   val get_nth_field : t -> int -> t
+  val to_bool : t -> bool
   val to_int : t -> int
   val to_float : t -> float
   val to_string : t -> string
+  val to_symbol : t -> string
   val to_tuple : t -> t array
+  val to_tuple2 : t -> t * t
+  val to_tuple3 : t -> t * t * t
+  val to_tuple4 : t -> t * t * t * t
   val to_array_any : t -> t array
   val typeof : t -> Jl_datatype.t
   val typeof_str : t -> string
   val typeis : t -> Jl_datatype.t -> bool
+  val type_error : t -> expected:string -> 'a
 end
 
 module Array : sig

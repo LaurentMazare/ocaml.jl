@@ -192,7 +192,7 @@ jl_value_t* named_fn(value* fn, jl_value_t* jl_args, jl_value_t* jl_kwargs) {
   return jl_res;
 }
 
-jl_value_t *jl_error_value(const char *fmt, ...) {
+jl_value_t *ml_jl_error_value(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     jl_value_t *e = jl_vexceptionf(jl_errorexception_type, fmt, args);
@@ -200,7 +200,7 @@ jl_value_t *jl_error_value(const char *fmt, ...) {
     return e;
 }
 
-jl_value_t **jl_gc_push_args(int n) {
+jl_value_t **ml_jl_gc_push_args(int n) {
   jl_value_t **rts_var = (jl_value_t**)malloc((n + 2)*sizeof(jl_value_t*));
   rts_var += 2;
   ((void**)rts_var)[-2] = (void*)JL_GC_ENCODE_PUSHARGS(n);
@@ -209,6 +209,12 @@ jl_value_t **jl_gc_push_args(int n) {
   jl_pgcstack = (jl_gcframe_t*)&(((void**)rts_var)[-2]);
 }
 
-void jl_gc_pop() {
+void ml_jl_gc_pop() {
   jl_pgcstack = jl_pgcstack->prev;
+}
+
+int8_t ml_jl_to_bool(jl_value_t *t) {
+  if (t == jl_true) return 1;
+  if (t == jl_false) return 0;
+  return jl_unbox_bool(t);
 }

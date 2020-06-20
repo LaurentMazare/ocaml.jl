@@ -255,24 +255,24 @@ module Param = struct
     check_valid_arg_name name;
     Opt_arg { name; of_julia; docstring }
 
-  let int = Of_julia.create ~type_name:"int" ~conv:Jl_value.to_int_exn
-  let float = Of_julia.create ~type_name:"float" ~conv:Jl_value.to_float_exn
-  let bool = Of_julia.create ~type_name:"bool" ~conv:Jl_value.to_bool_exn
-  let string = Of_julia.create ~type_name:"string" ~conv:Jl_value.to_string_exn
+  let int = Of_julia.create ~type_name:"int" ~conv:Jl_value.to_int
+  let float = Of_julia.create ~type_name:"float" ~conv:Jl_value.to_float
+  let bool = Of_julia.create ~type_name:"bool" ~conv:Jl_value.to_bool
+  let string = Of_julia.create ~type_name:"string" ~conv:Jl_value.to_string
   let jl_value = Of_julia.create ~type_name:"any" ~conv:Fn.id
 
   let pair (o1 : _ Of_julia.t) (o2 : _ Of_julia.t) =
     Of_julia.create
       ~type_name:(Printf.sprintf "(%s, %s)" o1.type_name o2.type_name)
       ~conv:(fun jl_value ->
-        let p1, p2 = Jl_value.tuple2_exn jl_value in
+        let p1, p2 = Jl_value.to_tuple2 jl_value in
         o1.conv p1, o2.conv p2)
 
   let triple (o1 : _ Of_julia.t) (o2 : _ Of_julia.t) (o3 : _ Of_julia.t) =
     Of_julia.create
       ~type_name:(Printf.sprintf "(%s, %s, %s)" o1.type_name o2.type_name o3.type_name)
       ~conv:(fun jl_value ->
-        let p1, p2, p3 = Jl_value.tuple3_exn jl_value in
+        let p1, p2, p3 = Jl_value.to_tuple3 jl_value in
         o1.conv p1, o2.conv p2, o3.conv p3)
 
   let quadruple
@@ -290,7 +290,7 @@ module Param = struct
            o3.type_name
            o4.type_name)
       ~conv:(fun jl_value ->
-        let p1, p2, p3, p4 = Jl_value.tuple4_exn jl_value in
+        let p1, p2, p3, p4 = Jl_value.to_tuple4 jl_value in
         o1.conv p1, o2.conv p2, o3.conv p3, o4.conv p4)
 
   let option (o : _ Of_julia.t) =
@@ -301,7 +301,7 @@ module Param = struct
 
   let array (o : _ Of_julia.t) =
     Of_julia.create ~type_name:(Printf.sprintf "[%s]" o.type_name) ~conv:(fun jl_value ->
-        Jl_value.array_any_exn jl_value |> Array.map ~f:o.conv)
+        Jl_value.to_array_any jl_value |> Array.map ~f:o.conv)
 
   let remaining_args ~docstring = Remaining_args docstring
   let remaining_kwargs ~docstring = Remaining_kwargs docstring

@@ -114,15 +114,18 @@ module Jl_value = struct
   let typeof_str = C.Jl_value.typeof_str
   let typeis = C.Jl_value.typeis
 
-  let wrong_type t ~expected =
+  let type_error t ~expected =
     Printf.failwithf "not a supported %s type %s" expected (typeof_str t) ()
+
+  let to_bool t =
+    if is_bool t then C.Jl_value.to_bool t else type_error t ~expected:"bool"
 
   let to_float t =
     if is_float64 t
     then C.Jl_value.unbox_float64 t
     else if is_float32 t
     then C.Jl_value.unbox_float32 t
-    else wrong_type t ~expected:"float"
+    else type_error t ~expected:"float"
 
   let to_int t =
     if C.Jl_value.is_int8 t
@@ -133,7 +136,7 @@ module Jl_value = struct
     then C.Jl_value.unbox_int32 t |> Int32.to_int_exn
     else if C.Jl_value.is_int64 t
     then C.Jl_value.unbox_int64 t |> Int64.to_int_exn
-    else wrong_type t ~expected:"int"
+    else type_error t ~expected:"int"
 
   let is_int t =
     C.Jl_value.is_int8 t
@@ -147,14 +150,37 @@ module Jl_value = struct
       let length = C.Jl_value.string_len t in
       let data = C.Jl_value.string_data t in
       string_from_ptr data ~length)
-    else wrong_type t ~expected:"string"
+    else type_error t ~expected:"string"
+
+  let is_symbol = C.Jl_value.is_symbol
+
+  let to_symbol t =
+    if is_symbol t then Jl_sym.symbol_name t else type_error t ~expected:"symbol"
 
   let to_tuple t =
     if is_tuple t
     then (
       let length = C.Jl_value.nfields t in
       Array.init length ~f:(fun i -> C.Jl_value.get_nth_field t i))
-    else wrong_type t ~expected:"tuple"
+    else type_error t ~expected:"tuple"
+
+  let to_tuple2 t =
+    match to_tuple t with
+    | [| t1; t2 |] -> t1, t2
+    | elems ->
+      Printf.failwithf "expected a tuple with 2 elements, got %d" (Array.length elems) ()
+
+  let to_tuple3 t =
+    match to_tuple t with
+    | [| t1; t2; t3 |] -> t1, t2, t3
+    | elems ->
+      Printf.failwithf "expected a tuple with 3 elements, got %d" (Array.length elems) ()
+
+  let to_tuple4 t =
+    match to_tuple t with
+    | [| t1; t2; t3; t4 |] -> t1, t2, t3, t4
+    | elems ->
+      Printf.failwithf "expected a tuple with 4 elements, got %d" (Array.length elems) ()
 
   let typeof = C.Jl_value.typeof
 
@@ -171,13 +197,14 @@ module Jl_value = struct
         C.Jl_value.new_structv tuple_type (CArray.start frame) n)
 
   let tuple = tuple_map ~f:Fn.id
+  let is_array_any t = typeis t array_any
 
   let to_array_any t =
-    if typeis t array_any
+    if is_array_any t
     then (
       let length = C.Jl_array.array_len t in
       Array.init length ~f:(fun i -> C.Jl_array.array_ptr_ref t i))
-    else wrong_type t ~expected:"array-any"
+    else type_error t ~expected:"array-any"
 
   let array_any_map t_array ~f =
     Gc.with_frame ~n:1 (fun protect ->

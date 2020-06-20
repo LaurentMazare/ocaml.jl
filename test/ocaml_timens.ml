@@ -1,18 +1,16 @@
 open Core_kernel
 open Jl
 
-let wrap time = Jl_value.Int (Time_ns.to_int_ns_since_epoch time)
-let wrap_span span = Jl_value.Int (Time_ns.Span.to_int_ns span)
+let wrap time = Jl_value.int (Time_ns.to_int_ns_since_epoch time)
+let wrap_span span = Jl_value.int (Time_ns.Span.to_int_ns span)
 
 let time_arg =
-  Defunc.Of_julia.create ~type_name:"time" ~conv:(function
-      | Int i -> Time_ns.of_int_ns_since_epoch i
-      | jl_value -> failwithf "expected an int, got %s" (Jl_value.kind_str jl_value) ())
+  Defunc.Of_julia.create ~type_name:"time" ~conv:(fun time ->
+      Jl_value.to_int time |> Time_ns.of_int_ns_since_epoch)
 
 let span_arg =
-  Defunc.Of_julia.create ~type_name:"span" ~conv:(function
-      | Int i -> Time_ns.Span.of_int_ns i
-      | jl_value -> failwithf "expected an int, got %s" (Jl_value.kind_str jl_value) ())
+  Defunc.Of_julia.create ~type_name:"span" ~conv:(fun span ->
+      Jl_value.to_int span |> Time_ns.Span.of_int_ns)
 
 let time_ns_of_string =
   let%map_open.Jl str = positional "str" string ~docstring:"" in
@@ -20,7 +18,7 @@ let time_ns_of_string =
 
 let time_ns_to_string =
   let%map_open.Jl time = positional "time" time_arg ~docstring:"" in
-  Jl_value.String (Time_ns.to_string time)
+  Jl_value.string (Time_ns.to_string time)
 
 let span_of_string =
   let%map_open.Jl str = positional "str" string ~docstring:"" in
@@ -28,7 +26,7 @@ let span_of_string =
 
 let span_to_string =
   let%map_open.Jl span = positional "span" span_arg ~docstring:"" in
-  Jl_value.String (Time_ns.Span.to_string span)
+  Jl_value.string (Time_ns.Span.to_string span)
 
 let time_ns_now () = Time_ns.now () |> wrap
 

@@ -82,7 +82,7 @@ module C (F : Cstubs.FOREIGN) = struct
     let true_ = foreign_value "jl_true" t
     let false_ = foreign_value "jl_false" t
     let emptytuple = foreign_value "jl_emptytuple" t
-    let error_value = foreign "jl_error_value" (string @-> returning t)
+    let error_value = foreign "ml_jl_error_value" (string @-> returning t)
     let box_float64 = foreign "jl_box_float64" (float @-> returning t)
     let box_int8 = foreign "jl_box_int8" (int8_t @-> returning t)
     let box_int16 = foreign "jl_box_int16" (int16_t @-> returning t)
@@ -140,6 +140,7 @@ module C (F : Cstubs.FOREIGN) = struct
     let typeof = foreign "jl_typeof" (t @-> returning Jl_datatype.t)
     let typeof_str = foreign "jl_typeof_str" (t @-> returning string)
     let typeis = foreign "jl_typeis" (t @-> Jl_datatype.t @-> returning bool)
+    let to_bool = foreign "ml_jl_to_bool" (t @-> returning bool)
 
     let apply_tuple_type_v =
       foreign "jl_apply_tuple_type_v" (ptr t @-> int @-> returning Jl_datatype.t)
@@ -169,6 +170,6 @@ module C (F : Cstubs.FOREIGN) = struct
 
   let eval_string = foreign "jl_eval_string" (string @-> returning Jl_value.t)
   let raise = foreign "jl_error" (string @-> returning void)
-  let gc_push_args = foreign "jl_gc_push_args" (int @-> returning (ptr Jl_value.t))
-  let gc_pop = foreign "jl_gc_pop" (void @-> returning void)
+  let gc_push_args = foreign "ml_jl_gc_push_args" (int @-> returning (ptr Jl_value.t))
+  let gc_pop = foreign "ml_jl_gc_pop" (void @-> returning void)
 end

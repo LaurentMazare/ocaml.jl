@@ -6,25 +6,21 @@ let func ~fn ~name =
   let fn args kwargs =
     try
       let args =
-        match (args : Jl_value.t) with
-        | Tuple args | Array args -> args
-        | _ ->
-          Printf.failwithf "expected a tuple as args, got %s" (Jl_value.kind_str args) ()
+        if Jl_value.is_tuple args
+        then Jl_value.to_tuple args
+        else if Jl_value.is_array_any args
+        then Jl_value.to_array_any args
+        else Jl_value.type_error args ~expected:"tuple or array"
       in
       let kwargs =
-        match (kwargs : Jl_value.t) with
-        | Array pairs ->
-          Array.fold pairs ~init:[] ~f:(fun acc pair ->
-              match pair with
-              | Tuple [| Symbol symbol; value |] -> (symbol, value) :: acc
-              | _ ->
-                Printf.failwithf "expected a pair, got %s" (Jl_value.kind_str pair) ())
+        if Jl_value.is_array_any kwargs
+        then
+          Jl_value.to_array_any kwargs
+          |> Array.fold ~init:[] ~f:(fun acc pair ->
+                 let symbol, value = Jl_value.to_tuple2 pair in
+                 (Jl_value.to_symbol symbol, value) :: acc)
           |> Map.of_alist_exn (module String)
-        | _ ->
-          Printf.failwithf
-            "expected an array of pairs as kwargs, got %s"
-            (Jl_value.kind_str kwargs)
-            ()
+        else Jl_value.type_error kwargs ~expected:"array of pairs"
       in
       fn ~args ~kwargs
     with
@@ -32,10 +28,7 @@ let func ~fn ~name =
        exception text is propagated to julia. *)
     | exn -> Exn.to_string exn |> failwith
   in
-  Caml.Callback.register name (fn : Jl_value.t -> Jl_value.t -> Jl_value.t);
-  Printf.sprintf "%s = Caml.fn(\"%s\")" name name
-  |> Wrapper.eval_string
-  |> (ignore : Wrapper.Jl_value.t -> unit)
+  Wrapper.register_fn name ~f:fn
 
 let defunc ~fn ~name =
   let fn ~args ~kwargs = Defunc.apply fn args kwargs in
