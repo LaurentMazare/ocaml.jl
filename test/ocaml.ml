@@ -18,6 +18,6 @@ let yetanother_fn =
 
 let () =
   Stdio.printf "Hello from ocaml!\n%!";
-  Register.func ~fn:mycaml_fn ~name:"mycaml_fn";
-  Register.defunc ~fn:myother_fn ~name:"myother_fn";
-  Register.defunc ~fn:yetanother_fn ~name:"yetanother_fn"
+  Register.func "mycaml_fn" ~f:mycaml_fn ~modl:Wrapper.Jl_module.main;
+  Register.defunc "myother_fn" myother_fn ~modl:Wrapper.Jl_module.main;
+  Register.defunc "yetanother_fn" yetanother_fn ~modl:Wrapper.Jl_module.main
