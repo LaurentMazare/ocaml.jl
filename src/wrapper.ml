@@ -246,6 +246,10 @@ end
 
 let eval_string = C.eval_string
 let raise = C.raise
+
+module Funptrs =
+(val Foreign.dynamic_funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
+
 let funptrs = Queue.create ()
 
 let register_fn name ~modl ~f =
@@ -256,21 +260,11 @@ let register_fn name ~modl ~f =
         try f args kwargs with
         | exn -> Exn.to_string exn |> Jl_value.error)
   in
-  let fn =
-    coerce
-      (Foreign.funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
-      (static_funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
-      f
-  in
-  let fn_ptr_as_int =
-    coerce
-      (static_funptr (C.Jl_value.t @-> C.Jl_value.t @-> returning C.Jl_value.t))
-      (ptr void)
-      fn
-    |> raw_address_of_ptr
-    |> Nativeint.to_int_exn
-  in
+  let fn = Funptrs.of_fun f in
   Queue.enqueue funptrs fn;
+  let fn_ptr_as_int =
+    coerce Funptrs.t (ptr void) fn |> raw_address_of_ptr |> Nativeint.to_int_exn
+  in
   let fn =
     Printf.sprintf
       "function(args...; kwargs...)\n\
