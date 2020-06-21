@@ -40,6 +40,12 @@ let zone_arg =
       then Jl_value.to_string zone |> Timezone.find_exn
       else Jl_value.type_error zone ~expected:"string")
 
+let arg jl_type ~type_name ~of_string =
+  Defunc.Of_julia.create ~type_name ~conv:(fun jl_value ->
+      if Jl_value.is_string jl_value
+      then Jl_value.to_string jl_value |> of_string
+      else Jl_type.unwrap jl_type jl_value)
+
 let () =
   let modl_name = Wrapper.Jl_sym.create "Time_ns" in
   let modl = Wrapper.Jl_module.create modl_name ~parent:Wrapper.Jl_module.main in
@@ -47,10 +53,10 @@ let () =
   let span_s = span_s ~modl in
   let date_s = date_s ~modl in
   let ofday_s = ofday_s ~modl in
-  let time_arg = Defunc.Of_julia.of_type time_s ~type_name:"time" in
-  let span_arg = Defunc.Of_julia.of_type span_s ~type_name:"span" in
-  let date_arg = Defunc.Of_julia.of_type date_s ~type_name:"date" in
-  let ofday_arg = Defunc.Of_julia.of_type ofday_s ~type_name:"ofday" in
+  let time_arg = arg time_s ~type_name:"time" ~of_string:Time_ns.of_string in
+  let span_arg = arg span_s ~type_name:"span" ~of_string:Time_ns.Span.of_string in
+  let date_arg = arg date_s ~type_name:"date" ~of_string:Date.of_string in
+  let ofday_arg = arg ofday_s ~type_name:"ofday" ~of_string:Time_ns.Ofday.of_string in
   let _ =
     Wrapper.eval_string
       "Base.show(io::IO, x::Time_ns.Time) = print(io, Time_ns.to_string(x))"
