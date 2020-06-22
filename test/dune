@@ -8,7 +8,7 @@
 
 (executables
   (names ocaml_timens)
-  (modules ocaml_timens)
+  (modules ocaml_timens jl_timens)
   (modes (native shared_object))
   (flags :standard -linkall)
   (preprocess (pps ppx_let ppx_sexp_conv))

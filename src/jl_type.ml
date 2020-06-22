@@ -31,9 +31,8 @@ let map t ~wrap ~unwrap =
   ; unwrap = (fun jl -> t.unwrap jl |> unwrap)
   }
 
-let struct1 ?modl name ~field =
+let struct_dt ?modl name ~fields =
   let symbol = Wrapper.Jl_sym.create name in
-  let field_name, field = field in
   let data_type =
     Wrapper.Jl_datatype.create
       symbol
@@ -41,12 +40,19 @@ let struct1 ?modl name ~field =
       Wrapper.Jl_module.main
       ~super:Wrapper.Jl_datatype.any
       ~abstract:false
-      ~fields:(`T1 (Wrapper.Jl_sym.create field_name, field.data_type))
+      ~fields
       ~mutable_:false
       ~ninitialized:0
   in
   Option.iter modl ~f:(fun modl ->
       Wrapper.(Jl_datatype.set_on_module data_type symbol modl));
+  data_type
+
+let struct1 ?modl name ~field =
+  let field_name, field = field in
+  let data_type =
+    struct_dt ?modl name ~fields:(`T1 (Wrapper.Jl_sym.create field_name, field.data_type))
+  in
   let wrap t = field.wrap t |> Wrapper.Jl_value.struct1 data_type in
   let unwrap jl =
     if Wrapper.Jl_value.typeis jl data_type
@@ -56,21 +62,10 @@ let struct1 ?modl name ~field =
   { data_type; wrap; unwrap }
 
 let struct2 ?modl name ~field1 ~field2 =
-  let symbol = Wrapper.Jl_sym.create name in
   let data_type =
     let f (field_name, field) = Wrapper.Jl_sym.create field_name, field.data_type in
-    Wrapper.Jl_datatype.create
-      symbol
-      (* Using modl here results in a segfault. *)
-      Wrapper.Jl_module.main
-      ~super:Wrapper.Jl_datatype.any
-      ~abstract:false
-      ~fields:(`T2 (f field1, f field2))
-      ~mutable_:false
-      ~ninitialized:0
+    struct_dt ?modl name ~fields:(`T2 (f field1, f field2))
   in
-  Option.iter modl ~f:(fun modl ->
-      Wrapper.(Jl_datatype.set_on_module data_type symbol modl));
   let _, field1 = field1 in
   let _, field2 = field2 in
   let wrap (t1, t2) =
