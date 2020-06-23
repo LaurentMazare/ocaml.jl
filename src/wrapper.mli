@@ -36,6 +36,7 @@ module Jl_datatype : sig
   val float64 : t
   val errorexception : t
   val any : t
+  val tuple : t array -> t
 
   val create
     :  Jl_sym.t
@@ -71,6 +72,8 @@ module Jl_value : sig
   val struct4 : Jl_datatype.t -> t -> t -> t -> t -> t
   val tuple : t array -> t
   val tuple_map : 'a array -> f:('a -> t) -> t
+  val tuple_with_type : Jl_datatype.t -> t array -> t
+  val tuple_map_with_type : Jl_datatype.t -> 'a array -> f:('a -> t) -> t
   val array_any : t array -> t
   val array_any_map : 'a array -> f:('a -> t) -> t
   val is_nothing : t -> bool

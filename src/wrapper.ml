@@ -86,6 +86,10 @@ module Jl_datatype = struct
       ninitialized
 
   let set_on_module t sym modl = C.set_const modl sym t
+
+  let tuple ts =
+    let types = CArray.of_list C.Jl_datatype.t (Array.to_list ts) in
+    C.Jl_value.apply_tuple_type_v (CArray.start types) (CArray.length types)
 end
 
 module Jl_value = struct
@@ -203,6 +207,17 @@ module Jl_value = struct
         C.Jl_value.new_structv tuple_type (CArray.start frame) n)
 
   let tuple = tuple_map ~f:Fn.id
+
+  let tuple_map_with_type tuple_type t_array ~f =
+    let n = Array.length t_array in
+    let frame = CArray.from_ptr (C.gc_push_args n) n in
+    Exn.protect ~finally:C.gc_pop ~f:(fun () ->
+        Array.iteri t_array ~f:(fun index elem ->
+            let elem = f elem in
+            CArray.set frame index elem);
+        C.Jl_value.new_structv tuple_type (CArray.start frame) n)
+
+  let tuple_with_type = tuple_map_with_type ~f:Fn.id
   let is_array_any t = typeis t array_any
 
   let to_array_any t =

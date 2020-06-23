@@ -1,8 +1,6 @@
 # ocaml.jl
 
-Prototyping some Julia-OCaml bridge.
-
-**CAUTION** this is not memory safe at the moment and is likely to run into segfaults.
+Prototyping some Julia-OCaml bridge, this has only been tested with Julia 1.4.2.
 
 The examples can be run with:
 ```bash
@@ -25,7 +23,6 @@ let () =
 
 This can then be called from Julia via:
 ```julia
-fn2 = Caml.fn("myother_fn")
 println(Main.ocaml_concat(4))
 println(Main.ocaml_concat(2; y="test"))
 ```

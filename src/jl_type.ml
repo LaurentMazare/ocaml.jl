@@ -25,6 +25,48 @@ let string =
   ; unwrap = Jl_value.to_string
   }
 
+let tuple2 t1 t2 =
+  let data_type = Wrapper.Jl_datatype.tuple [| t1.data_type; t2.data_type |] in
+  let wrap (v1, v2) =
+    Wrapper.Jl_value.tuple_with_type data_type [| t1.wrap v1; t2.wrap v2 |]
+  in
+  let unwrap jl =
+    ( Wrapper.Jl_value.get_nth_field jl 0 |> t1.unwrap
+    , Wrapper.Jl_value.get_nth_field jl 1 |> t2.unwrap )
+  in
+  { data_type; wrap; unwrap }
+
+let tuple3 t1 t2 t3 =
+  let data_type =
+    Wrapper.Jl_datatype.tuple [| t1.data_type; t2.data_type; t3.data_type |]
+  in
+  let wrap (v1, v2, v3) =
+    Wrapper.Jl_value.tuple_with_type data_type [| t1.wrap v1; t2.wrap v2; t3.wrap v3 |]
+  in
+  let unwrap jl =
+    ( Wrapper.Jl_value.get_nth_field jl 0 |> t1.unwrap
+    , Wrapper.Jl_value.get_nth_field jl 1 |> t2.unwrap
+    , Wrapper.Jl_value.get_nth_field jl 2 |> t3.unwrap )
+  in
+  { data_type; wrap; unwrap }
+
+let tuple4 t1 t2 t3 t4 =
+  let data_type =
+    Wrapper.Jl_datatype.tuple [| t1.data_type; t2.data_type; t3.data_type; t4.data_type |]
+  in
+  let wrap (v1, v2, v3, v4) =
+    Wrapper.Jl_value.tuple_with_type
+      data_type
+      [| t1.wrap v1; t2.wrap v2; t3.wrap v3; t4.wrap v4 |]
+  in
+  let unwrap jl =
+    ( Wrapper.Jl_value.get_nth_field jl 0 |> t1.unwrap
+    , Wrapper.Jl_value.get_nth_field jl 1 |> t2.unwrap
+    , Wrapper.Jl_value.get_nth_field jl 2 |> t3.unwrap
+    , Wrapper.Jl_value.get_nth_field jl 3 |> t4.unwrap )
+  in
+  { data_type; wrap; unwrap }
+
 let map t ~wrap ~unwrap =
   { data_type = t.data_type
   ; wrap = (fun x -> wrap x |> t.wrap)

@@ -12,6 +12,11 @@ val int64 : int t
 val float64 : float t
 val string : string t
 
+(* Composition *)
+val tuple2 : 'a t -> 'b t -> ('a * 'b) t
+val tuple3 : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+val tuple4 : 'a t -> 'b t -> 'c t -> 'd t -> ('a * 'b * 'c * 'd) t
+
 (* Structs *)
 val struct1 : ?modl:Wrapper.Jl_module.t -> string -> field:string * 'a t -> 'a t
 
