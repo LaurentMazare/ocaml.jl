@@ -2,24 +2,6 @@ open! Base
 open! Ctypes
 module C = Bindings.C (Jl_ctypes)
 
-module Gc = struct
-  let enable = C.Gc.enable
-
-  let run_with_no_gc ~f =
-    let old_status = enable false in
-    Exn.protect ~f ~finally:(fun () -> ignore (enable old_status : bool))
-
-  let with_frame ~n fn =
-    let frame = CArray.from_ptr (C.gc_push_args n) n in
-    let idx = ref 0 in
-    let protect jl_value =
-      CArray.set frame !idx jl_value;
-      Int.incr idx;
-      jl_value
-    in
-    Exn.protect ~f:(fun () -> fn protect) ~finally:C.gc_pop
-end
-
 module Jl_sym = struct
   type t = C.Jl_sym.t
 
@@ -37,6 +19,44 @@ module Jl_module = struct
   let core = !@C.Jl_module.core
   let main = !@C.Jl_module.main
   let top = !@C.Jl_module.top
+end
+
+module Gc = struct
+  let enable = C.Gc.enable
+
+  let run_with_no_gc ~f =
+    let old_status = enable false in
+    Exn.protect ~f ~finally:(fun () -> ignore (enable old_status : bool))
+
+  let with_frame ~n fn =
+    let frame = CArray.from_ptr (C.gc_push_args n) n in
+    let idx = ref 0 in
+    let protect jl_value =
+      CArray.set frame !idx jl_value;
+      Int.incr idx;
+      jl_value
+    in
+    Exn.protect ~f:(fun () -> fn protect) ~finally:C.gc_pop
+
+  let add_remove =
+    lazy
+      (let refs = C.eval_string "ocaml_refs = IdDict()" in
+       let set_index_fn = C.Jl_function.get Jl_module.base "set_index!" in
+       let delete_fn = C.Jl_function.get Jl_module.base "delete!" in
+       let add v =
+         C.Jl_function.call3 set_index_fn refs v v |> (ignore : C.Jl_value.t -> unit)
+       in
+       let remove v =
+         C.Jl_function.call2 delete_fn refs v |> (ignore : C.Jl_value.t -> unit)
+       in
+       add, remove)
+
+  let protect v =
+    let add, remove = Lazy.force add_remove in
+    add v;
+    Caml.Gc.finalise remove v
+
+  let protect_data_type = protect
 end
 
 module Svec = struct

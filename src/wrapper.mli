@@ -155,4 +155,6 @@ module Gc : sig
   val with_frame : n:int -> ((Jl_value.t -> Jl_value.t) -> Jl_value.t) -> Jl_value.t
 
   val run_with_no_gc : f:(unit -> 'a) -> 'a
+  val protect : Jl_value.t -> unit
+  val protect_data_type : Jl_datatype.t -> unit
 end
