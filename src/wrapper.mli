@@ -113,6 +113,16 @@ module Array : sig
   val length : t -> int
 end
 
+module Jl_function : sig
+  type t
+
+  val get : Jl_module.t -> string -> t
+  val call0 : t -> Jl_value.t
+  val call1 : t -> Jl_value.t -> Jl_value.t
+  val call2 : t -> Jl_value.t -> Jl_value.t -> Jl_value.t
+  val call3 : t -> Jl_value.t -> Jl_value.t -> Jl_value.t -> Jl_value.t
+end
+
 module Exception : sig
   val occurred : unit -> Jl_value.t option
   val current_exception : unit -> Jl_value.t

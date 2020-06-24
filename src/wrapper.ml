@@ -250,6 +250,16 @@ module Array = struct
   let get = C.Jl_array.array_ptr_ref
 end
 
+module Jl_function = struct
+  type t = C.Jl_function.t
+
+  let get = C.Jl_function.get
+  let call0 = C.Jl_function.call0
+  let call1 = C.Jl_function.call1
+  let call2 = C.Jl_function.call2
+  let call3 = C.Jl_function.call3
+end
+
 module Exception = struct
   let occurred () =
     let jl_value = C.Exception.occurred () in

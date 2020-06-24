@@ -160,6 +160,23 @@ module C (F : Cstubs.FOREIGN) = struct
     let array_len = foreign "jl_array_len" (t @-> returning int)
   end
 
+  module Jl_function = struct
+    type t = unit ptr
+
+    let t : t typ = ptr (typedef void "jl_function_t")
+    let get = foreign "jl_get_function" (Jl_module.t @-> string @-> returning t)
+    let call0 = foreign "jl_call0" (t @-> returning Jl_value.t)
+    let call1 = foreign "jl_call1" (t @-> Jl_value.t @-> returning Jl_value.t)
+
+    let call2 =
+      foreign "jl_call2" (t @-> Jl_value.t @-> Jl_value.t @-> returning Jl_value.t)
+
+    let call3 =
+      foreign
+        "jl_call3"
+        (t @-> Jl_value.t @-> Jl_value.t @-> Jl_value.t @-> returning Jl_value.t)
+  end
+
   module Exception = struct
     let occurred = foreign "jl_exception_occurred" (void @-> returning Jl_value.t)
     let current_exception = foreign "jl_current_exception" (void @-> returning Jl_value.t)
