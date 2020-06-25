@@ -42,7 +42,12 @@ module Jl_datatype : sig
     :  Jl_sym.t
     -> Jl_module.t
     -> super:t
-    -> fields:[ `T0 | `T1 of Jl_sym.t * t | `T2 of (Jl_sym.t * t) * (Jl_sym.t * t) ]
+    -> fields:
+         [ `T0
+         | `T1 of Jl_sym.t * t
+         | `T2 of (Jl_sym.t * t) * (Jl_sym.t * t)
+         | `T of (Jl_sym.t * t) array
+         ]
     -> abstract:bool
     -> mutable_:bool
     -> ninitialized:int
@@ -70,6 +75,7 @@ module Jl_value : sig
   val struct2 : Jl_datatype.t -> t -> t -> t
   val struct3 : Jl_datatype.t -> t -> t -> t -> t
   val struct4 : Jl_datatype.t -> t -> t -> t -> t -> t
+  val struct_n : Jl_datatype.t -> t array -> t
   val tuple : t array -> t
   val tuple_map : 'a array -> f:('a -> t) -> t
   val tuple_with_type : Jl_datatype.t -> t array -> t

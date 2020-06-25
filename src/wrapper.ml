@@ -63,6 +63,13 @@ module Svec = struct
   let empty = !@C.Jl_svec.empty
   let create1 = C.Jl_svec.create1
   let create2 = C.Jl_svec.create2
+
+  let of_array values =
+    let n = Array.length values in
+    let t = C.Jl_svec.alloc n in
+    let data = C.Jl_svec.data t in
+    Array.iteri values ~f:(fun i value -> data +@ i <-@ value);
+    t
 end
 
 module Jl_datatype = struct
@@ -93,6 +100,8 @@ module Jl_datatype = struct
       | `T0 -> Svec.empty, Svec.empty
       | `T1 (s, t) -> Svec.create1 s, Svec.create1 t
       | `T2 ((s1, t1), (s2, t2)) -> Svec.create2 s1 s2, Svec.create2 t1 t2
+      | `T st ->
+        Array.map st ~f:fst |> Svec.of_array, Array.map st ~f:snd |> Svec.of_array
     in
     C.Jl_datatype.create
       name
@@ -130,6 +139,11 @@ module Jl_value = struct
   let struct2 = C.Jl_value.new_struct2
   let struct3 = C.Jl_value.new_struct3
   let struct4 = C.Jl_value.new_struct4
+
+  let struct_n dt ts =
+    let ts = CArray.of_list C.Jl_value.t (Array.to_list ts) in
+    C.Jl_value.new_structv dt (CArray.start ts) (CArray.length ts)
+
   let is_nothing = C.Jl_value.is_nothing
   let is_bool = C.Jl_value.is_bool
   let is_string = C.Jl_value.is_string

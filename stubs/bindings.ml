@@ -26,11 +26,15 @@ module C (F : Cstubs.FOREIGN) = struct
 
   module Jl_svec = struct
     type t = unit ptr
+    type jl_value_t = unit ptr
 
     let t : t typ = ptr (typedef void "jl_svec_t")
+    let jl_value_t : t typ = ptr (typedef void "jl_value_t")
     let empty = foreign_value "jl_emptysvec" t
     let create1 = foreign "jl_svec1" (ptr void @-> returning t)
     let create2 = foreign "jl_svec2" (ptr void @-> ptr void @-> returning t)
+    let alloc = foreign "jl_alloc_svec" (int @-> returning t)
+    let data = foreign "jl_svec_data" (t @-> returning (ptr jl_value_t))
   end
 
   module Jl_datatype = struct
