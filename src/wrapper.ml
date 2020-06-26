@@ -321,6 +321,8 @@ module Jl_function = struct
   let call t args =
     let args = CArray.of_list C.Jl_value.t args in
     C.Jl_function.call t (CArray.start args) (CArray.length args) |> maybe_raise
+
+  let call_v = call
 end
 
 let eval_string = C.eval_string

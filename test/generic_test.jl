@@ -23,3 +23,5 @@ fn2 = Main.yetanother_fn
 println(fn2(4))
 println(typeof(fn2(4)))
 println(fn2(4)[2])
+
+println(Main.with_julia_callback_fn(42, x -> 2*x))

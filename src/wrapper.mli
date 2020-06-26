@@ -129,6 +129,7 @@ module Jl_function : sig
   val call2 : t -> Jl_value.t -> Jl_value.t -> Jl_value.t
   val call3 : t -> Jl_value.t -> Jl_value.t -> Jl_value.t -> Jl_value.t
   val call : t -> Jl_value.t list -> Jl_value.t
+  val call_v : Jl_value.t -> Jl_value.t list -> Jl_value.t
 end
 
 module Exception : sig
