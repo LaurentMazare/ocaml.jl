@@ -273,6 +273,17 @@ module Jl_value = struct
   let bool = function
     | true -> true_
     | false -> false_
+
+  let string_pp : t -> string =
+    let string_fn = lazy (C.Jl_function.get Jl_module.base "string") in
+    fun jl_value ->
+      let jl_value = C.Jl_function.call1 (Lazy.force string_fn) jl_value in
+      if is_string jl_value
+      then (
+        let length = C.Jl_value.string_len jl_value in
+        let data = C.Jl_value.string_data jl_value in
+        string_from_ptr data ~length)
+      else Printf.sprintf "Value<%s>" (C.Jl_value.typeof_str jl_value)
 end
 
 module Array = struct
@@ -284,16 +295,6 @@ module Array = struct
   let get = C.Jl_array.array_ptr_ref
 end
 
-module Jl_function = struct
-  type t = C.Jl_function.t
-
-  let get = C.Jl_function.get
-  let call0 = C.Jl_function.call0
-  let call1 = C.Jl_function.call1
-  let call2 = C.Jl_function.call2
-  let call3 = C.Jl_function.call3
-end
-
 module Exception = struct
   let occurred () =
     let jl_value = C.Exception.occurred () in
@@ -301,6 +302,25 @@ module Exception = struct
 
   let current_exception = C.Exception.current_exception
   let clear = C.Exception.clear
+end
+
+module Jl_function = struct
+  type t = C.Jl_function.t
+
+  let maybe_raise v =
+    match Exception.occurred () with
+    | None -> v
+    | Some v -> Printf.failwithf "julia error: %s" (Jl_value.string_pp v) ()
+
+  let get = C.Jl_function.get
+  let call0 t = C.Jl_function.call0 t |> maybe_raise
+  let call1 t v1 = C.Jl_function.call1 t v1 |> maybe_raise
+  let call2 t v1 v2 = C.Jl_function.call2 t v1 v2 |> maybe_raise
+  let call3 t v1 v2 v3 = C.Jl_function.call3 t v1 v2 v3 |> maybe_raise
+
+  let call t args =
+    let args = CArray.of_list C.Jl_value.t args in
+    C.Jl_function.call t (CArray.start args) (CArray.length args) |> maybe_raise
 end
 
 let eval_string = C.eval_string

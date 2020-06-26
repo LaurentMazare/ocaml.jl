@@ -108,6 +108,7 @@ module Jl_value : sig
   val typeof_str : t -> string
   val typeis : t -> Jl_datatype.t -> bool
   val type_error : t -> expected:string -> 'a
+  val string_pp : t -> string
 end
 
 module Array : sig
@@ -127,6 +128,7 @@ module Jl_function : sig
   val call1 : t -> Jl_value.t -> Jl_value.t
   val call2 : t -> Jl_value.t -> Jl_value.t -> Jl_value.t
   val call3 : t -> Jl_value.t -> Jl_value.t -> Jl_value.t -> Jl_value.t
+  val call : t -> Jl_value.t list -> Jl_value.t
 end
 
 module Exception : sig

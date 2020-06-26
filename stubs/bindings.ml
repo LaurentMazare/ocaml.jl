@@ -179,6 +179,8 @@ module C (F : Cstubs.FOREIGN) = struct
       foreign
         "jl_call3"
         (t @-> Jl_value.t @-> Jl_value.t @-> Jl_value.t @-> returning Jl_value.t)
+
+    let call = foreign "jl_call" (t @-> ptr Jl_value.t @-> int @-> returning Jl_value.t)
   end
 
   module Exception = struct

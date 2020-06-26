@@ -1,7 +1,8 @@
 open Base
 open Jl
 
-let mycaml_fn ~args:_ ~kwargs:_ =
+let mycaml_fn ~args ~kwargs:_ =
+  Array.iteri args ~f:(fun i arg -> Stdio.printf "%d %s\n%!" i (Jl_value.string_pp arg));
   Jl_value.(
     array_any [| float64 42.; string "foobar"; tuple [| int 1337; string "baz" |] |])
 
