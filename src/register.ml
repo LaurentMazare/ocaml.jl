@@ -35,6 +35,3 @@ let defunc name ~modl defunc =
   func name ~modl ~f
 
 let no_arg name ~modl ~f = defunc name ~modl (Defunc.no_arg f)
-
-(* Force a dependency on named_fn to avoid the symbol not being linked. *)
-external _name : unit -> unit = "named_fn"
