@@ -1,6 +1,6 @@
 # ocaml.jl
 
-Prototyping some Julia-OCaml bridge, this has only been tested with Julia 1.4.2.
+Prototyping some Julia-OCaml bridge, this has been tested with Julia 1.4.2 and Julia 1.5.3.
 
 The examples can be run with:
 ```bash
